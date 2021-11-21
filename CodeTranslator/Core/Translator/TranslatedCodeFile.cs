@@ -6,5 +6,6 @@ namespace CodeTranslator.Core.Translator
 {
     internal class TranslatedCodeFile
     {
+        
     }
 }

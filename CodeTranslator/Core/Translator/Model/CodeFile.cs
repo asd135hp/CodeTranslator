@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace CodeTranslator.Core.Translator.Model
 {
-    internal class CodeFile
+    internal class CodeFile: CustomFileInfo
     {
+        public DirectoryTree ParentFolder { get; internal set; }
+        public IEnumerable<string> CodeLines { get; internal set; }
+        public uint LineCount { get; internal set; }
     }
 }
