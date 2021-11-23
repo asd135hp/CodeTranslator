@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Collections.Generic;
 
-namespace CodeTranslator.Core.Translator.Model
+namespace CodeTranslator.Core.Translation.Code.Model
 {
     public class Language
     {

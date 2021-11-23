@@ -1,4 +1,5 @@
 ﻿using CodeTranslator.Core.Translator.Model;
+using CodeTranslator.Core.Translation.Code.Model;
 
 namespace CodeTranslator.Core
 {

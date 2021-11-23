@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using CodeTranslator.Core.Translator.Model;
+using CodeTranslator.Core.Translation.Code.Model;
 
 namespace CodeTranslator.Core.Translator.SingleFile
 {

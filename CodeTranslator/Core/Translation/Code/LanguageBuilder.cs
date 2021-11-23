@@ -2,9 +2,9 @@
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
-using CodeTranslator.Core.Translator.Model;
+using CodeTranslator.Core.Translation.Code.Model;
 
-namespace CodeTranslator.Core.Translator
+namespace CodeTranslator.Core.Translation.Code
 {
     public class LanguageBuilder
     {
