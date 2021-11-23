@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CodeTranslator.Core.Translator
 {
-    internal class TranslatedCodeFile
+    public class TranslatedCodeFile
     {
         
     }

@@ -5,9 +5,9 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Translator", "Translator\Translator.csproj", "{7C3C4F54-3E34-4893-A746-F7A010582FC3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeTranslator", "CodeTranslator\CodeTranslator.csproj", "{CD8C406B-1BAF-4A0C-BBCC-8646AA1B56CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeTranslator", "CodeTranslator\CodeTranslator.csproj", "{CD8C406B-1BAF-4A0C-BBCC-8646AA1B56CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeTranslatorTest", "CodeTranslatorTest\CodeTranslatorTest.csproj", "{65319D55-DB1B-423D-9ECF-13DE5753E3B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeTranslatorTest", "CodeTranslatorTest\CodeTranslatorTest.csproj", "{65319D55-DB1B-423D-9ECF-13DE5753E3B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

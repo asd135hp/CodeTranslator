@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
+using CodeTranslator.Core.Translator.Model;
+
 namespace CodeTranslator.Core.Translator.Null
 {
     internal class NullTranslator : ITranslator
     {
+        public DirectoryTree Directory { get; set; }
+        public Language Language { get; set; }
     }
 }

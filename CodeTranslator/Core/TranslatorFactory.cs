@@ -5,7 +5,7 @@ using CodeTranslator.Core.Translator.Null;
 
 namespace CodeTranslator.Core
 {
-    enum TranslatorType
+    public enum TranslatorType
     {
         Github,
         LocalDirectory,
@@ -13,7 +13,7 @@ namespace CodeTranslator.Core
         None
     }
 
-    internal class TranslatorFactory
+    public class TranslatorFactory
     {
         public ITranslator Create(TranslatorType tt)
             => tt switch

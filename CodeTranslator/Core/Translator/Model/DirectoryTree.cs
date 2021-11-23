@@ -4,29 +4,31 @@ using System.Text.RegularExpressions;
 
 namespace CodeTranslator.Core.Translator.Model
 {
-    internal abstract class DirectoryTree
+    public abstract class DirectoryTree
     {
         public readonly string RootDirectoryName;
         public readonly string FolderName;
         public readonly DirectoryTree ParentDirectory;
-        public readonly List<DirectoryTree> ChildDirectories;
+        public IEnumerable<DirectoryTree> ChildDirectories { get; protected set; }
+        public IEnumerable<TranslatedCodeFile> TranslatedCodeFiles { get; protected set; }
 
         public DirectoryTree(string rootDirectory)
         {
             RootDirectoryName = rootDirectory;
-            FolderName = new Regex("[\\/]").Split(rootDirectory).Last();
+            FolderName = new Regex("[\\/\\\\]").Split(rootDirectory).Last();
             ParentDirectory = null;
-            ChildDirectories = new List<DirectoryTree>();
+            GenerateChildDirectories();
         }
 
-        public DirectoryTree(string rootDirectory, DirectoryTree parentDirectory)
+        protected DirectoryTree(string rootDirectory, DirectoryTree parentDirectory)
             : this(rootDirectory)
         {
             ParentDirectory = parentDirectory;
         }
 
         /// <summary>
-        /// 
+        /// From given information in DirectoryTree,
+        /// generate all possible child directories
         /// </summary>
         protected abstract void GenerateChildDirectories();
     }
