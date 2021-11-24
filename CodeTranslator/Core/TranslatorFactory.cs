@@ -15,11 +15,11 @@ namespace CodeTranslator.Core
 
     public class TranslatorFactory
     {
-        public ITranslator Create(TranslatorType tt)
+        public ITranslator Create(TranslatorType tt, string path)
             => tt switch
             {
                 TranslatorType.Github => new GithubTranslator(),
-                TranslatorType.LocalDirectory => new LocalDirectoryTranslator(),
+                TranslatorType.LocalDirectory => new LocalDirectoryTranslator(path),
                 TranslatorType.SingleFile => new SingleFileTranslator(),
                 _ => new NullTranslator()
             };

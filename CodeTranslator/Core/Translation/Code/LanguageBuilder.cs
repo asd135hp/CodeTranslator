@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
 using CodeTranslator.Core.Translation.Code.Model;
 
 namespace CodeTranslator.Core.Translation.Code
@@ -9,14 +8,15 @@ namespace CodeTranslator.Core.Translation.Code
     public class LanguageBuilder
     {
         private string _directory = "";
-        private readonly Queue<Task> _tasks = new Queue<Task>();
         internal readonly Language _language = new Language()
         {
             Info = null
         };
 
         /// <summary>
-        /// 
+        /// Set absolute directory for finding language file.
+        /// If this method is not called then the language file must be in a folder named "translation".
+        /// The language file must also be in the same execution folder as this program
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
@@ -31,29 +31,21 @@ namespace CodeTranslator.Core.Translation.Code
         }
 
         /// <summary>
-        /// 
+        /// Set up language file for builder to start doing works
         /// </summary>
-        /// <param name="translationFileName"></param>
+        /// <param name="translationFileName">Only name and extension (.json)</param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException"></exception>
         public LanguageBuilder SetLanguageFile(string translationFileName)
         {
-            string fileName = $"{_directory}/{translationFileName}".TrimStart('/');
+            string fileName = _directory.Length == 0 ?
+                $"translation/{translationFileName}" :
+                $"{_directory}/{translationFileName}";
 
             if (!File.Exists(fileName))
                 throw new FileNotFoundException($"Could not find local language file: {fileName}");
 
             _language.Info = new FileInfo(fileName);
-
-            _tasks.Enqueue(Task.Run(() =>
-            {
-                var jd = JsonDocument.Parse(File.OpenRead(fileName), new JsonDocumentOptions()
-                {
-                    AllowTrailingCommas = true,
-                    CommentHandling = JsonCommentHandling.Skip
-                });
-                ParseLanguageFile(jd);
-            }));
 
             return this;
         }
@@ -88,19 +80,18 @@ namespace CodeTranslator.Core.Translation.Code
         }
 
         /// <summary>
-        /// 
+        /// Obligatory method for Builder pattern
         /// </summary>
-        /// <param name="waitToFinishTasks"></param>
         /// <returns></returns>
-        public Language Build(bool waitToFinishTasks = true)
+        public Language Build()
         {
-            if (waitToFinishTasks)
-                while (_tasks.Count != 0)
-                {
-                    var task = _tasks.Dequeue();
-                    task.Wait();
-                    task.Dispose();
-                }
+            var stream = File.OpenRead(_language.Info.FullName);
+            var jd = JsonDocument.Parse(stream, new JsonDocumentOptions()
+            {
+                AllowTrailingCommas = true,
+                CommentHandling = JsonCommentHandling.Skip
+            });
+            ParseLanguageFile(jd);
 
             return _language;
         }

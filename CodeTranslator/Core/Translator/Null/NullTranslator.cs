@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using CodeTranslator.Core.Translator.Model;
-using CodeTranslator.Core.Translation.Code.Model;
+﻿
 
 namespace CodeTranslator.Core.Translator.Null
 {
-    internal class NullTranslator : ITranslator
+    internal class NullTranslator : GenericTranslator
     {
-        public DirectoryTree Directory { get; set; }
-        public Language Language { get; set; }
+
     }
 }

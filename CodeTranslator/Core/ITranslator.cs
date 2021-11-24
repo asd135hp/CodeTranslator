@@ -1,11 +1,10 @@
-﻿using CodeTranslator.Core.Translator.Model;
-using CodeTranslator.Core.Translation.Code.Model;
+﻿using CodeTranslator.Core.Output;
+using CodeTranslator.Core.Model;
 
 namespace CodeTranslator.Core
 {
     public interface ITranslator
     {
-        public DirectoryTree Directory { get; set; }
-        public Language Language { get; set; }
+        public GenericOutput TranslateFile(CodeFile codeFile);
     }
 }

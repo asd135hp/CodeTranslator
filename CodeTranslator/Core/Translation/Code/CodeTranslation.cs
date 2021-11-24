@@ -1,10 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Threading.Tasks;
+
+using CodeTranslator.Core.Model;
+using CodeTranslator.Core.Output;
+using CodeTranslator.Core.Output.Translated;
+using CodeTranslator.Core.Translation.Code.Model;
+using CodeTranslator.Utility;
 
 namespace CodeTranslator.Core.Translation.Code
 {
-    internal class CodeTranslation : ITranslation
+    public class CodeTranslation : AsyncTokenWrapper, ITranslation
     {
+        public Language Language { get; set; }
+
+        public ProgressManagement Progress { get; private set; }
+
+        public GenericOutput GetOutput(CodeFile codeFile)
+        {
+            Progress = ProgressManagement.GetInstance();
+            var output = new TranslatedCodeFile(codeFile);
+
+            Task.Run(() =>
+            {
+                ulong count = 0;
+                foreach(string codeLine in codeFile.CodeLines)
+                {
+                    // somehow translate the line - TODO
+                    var translatedCodeLine = "";
+
+                    output.TranslatedCodeLines[count] = translatedCodeLine;
+
+                    // end translation
+                    if (_token.IsCancellationRequested) break;
+                    count++;
+                }
+
+                // dispose the progress management object
+                Progress.Dispose();
+            }, _token);
+
+            return output;
+        }
     }
 }

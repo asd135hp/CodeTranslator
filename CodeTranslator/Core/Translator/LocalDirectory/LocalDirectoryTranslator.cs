@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using CodeTranslator.Core.Translator.Model;
-using CodeTranslator.Core.Translation.Code.Model;
+﻿using System.IO;
 
 namespace CodeTranslator.Core.Translator.LocalDirectory
 {
-    internal class LocalDirectoryTranslator : ITranslator
+    public class LocalDirectoryTranslator : GenericTranslator
     {
-        public DirectoryTree Directory { get; set; }
-        public Language Language { get; set; }
+        public LocalDirectoryTranslator(string rootDirectoryPath)
+        {
+            if (!Directory.Exists(rootDirectoryPath))
+                throw new DirectoryNotFoundException("Provided directory must be a local path in your machine");
+
+            RootDirectory = new LocalDirectoryTree(rootDirectoryPath);
+        }
     }
 }

@@ -67,14 +67,14 @@ namespace CodeTranslatorTest
         [Test]
         public void TestHandlingCancellationToken()
         {
-            Assert.Throws<TaskCanceledException>(() =>
+            var list = new List<Task>();
+
+            for (int i = 0; i < 10; i++)
             {
-                for (int i = 0; i < 1000; i++)
-                {
-                    Task.Run(async () => await Task.Delay(10), token);
-                    if (i == 400) source.Cancel();
-                }
-            });
+                list.Add(Task.Run(() => Console.WriteLine("???"), token));
+                if (i == 4) source.Cancel();
+            }
+
         }
     }
 }
