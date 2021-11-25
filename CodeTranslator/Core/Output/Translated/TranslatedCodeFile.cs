@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
-using CodeTranslator.Core.Model;
+
+using CodeTranslator.Model;
 
 namespace CodeTranslator.Core.Output.Translated
 {
-    internal class TranslatedCodeFile : GenericOutput
+    public sealed class TranslatedCodeFile : GenericOutput
     {
         private ulong _currentLineIndex;
         internal readonly Dictionary<ulong, string> TranslatedCodeLines;

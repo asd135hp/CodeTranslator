@@ -18,7 +18,7 @@ namespace CodeTranslator.Core
         public ITranslator Create(TranslatorType tt, string path)
             => tt switch
             {
-                TranslatorType.Github => new GithubTranslator(),
+                TranslatorType.Github => new GithubTranslator(path),
                 TranslatorType.LocalDirectory => new LocalDirectoryTranslator(path),
                 TranslatorType.SingleFile => new SingleFileTranslator(),
                 _ => new NullTranslator()

@@ -1,7 +1,8 @@
-﻿using CodeTranslator.Core.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
+using CodeTranslator.Model;
 
 namespace CodeTranslator.Core.Output.UML
 {

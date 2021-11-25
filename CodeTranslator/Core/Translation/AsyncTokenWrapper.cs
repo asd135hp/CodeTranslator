@@ -5,7 +5,7 @@ namespace CodeTranslator.Core.Translation
     public abstract class AsyncTokenWrapper
     {
         private readonly CancellationTokenSource _source = null;
-        protected readonly CancellationToken _token;
+        internal readonly CancellationToken _token;
 
         public AsyncTokenWrapper()
         {

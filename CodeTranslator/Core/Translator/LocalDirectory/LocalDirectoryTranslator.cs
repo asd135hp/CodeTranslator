@@ -2,7 +2,7 @@
 
 namespace CodeTranslator.Core.Translator.LocalDirectory
 {
-    public class LocalDirectoryTranslator : GenericTranslator
+    public sealed class LocalDirectoryTranslator : GenericTranslator
     {
         public LocalDirectoryTranslator(string rootDirectoryPath)
         {

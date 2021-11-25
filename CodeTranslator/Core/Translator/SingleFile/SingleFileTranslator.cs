@@ -2,7 +2,7 @@
 
 namespace CodeTranslator.Core.Translator.SingleFile
 {
-    internal class SingleFileTranslator: GenericTranslator
+    internal sealed class SingleFileTranslator: GenericTranslator
     {
 
     }

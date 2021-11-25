@@ -9,4 +9,8 @@
     <Folder Include="Core\Output\UML\Parser\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="GraphQL" Version="4.6.1" />
+  </ItemGroup>
+
 </Project>

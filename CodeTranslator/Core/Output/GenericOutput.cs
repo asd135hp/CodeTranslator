@@ -1,4 +1,4 @@
-﻿using CodeTranslator.Core.Model;
+﻿using CodeTranslator.Model;
 
 namespace CodeTranslator.Core.Output
 {

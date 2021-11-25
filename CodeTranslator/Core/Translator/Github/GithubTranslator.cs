@@ -1,9 +1,17 @@
-﻿
+﻿using System;
 
 namespace CodeTranslator.Core.Translator.Github
 {
-    internal class GithubTranslator : GenericTranslator
+    public sealed class GithubTranslator : GenericTranslator
     {
+        public GithubTranslator(string repoUrl) : this(new Uri(repoUrl))
+        {
 
+        }
+
+        public GithubTranslator(Uri uri)
+        {
+            
+        }
     }
 }

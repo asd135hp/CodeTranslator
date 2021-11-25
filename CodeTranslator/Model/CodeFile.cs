@@ -1,7 +1,9 @@
 ﻿using System.IO;
 using System.Collections.Generic;
 
-namespace CodeTranslator.Core.Model
+using CodeTranslator.Model.Tree;
+
+namespace CodeTranslator.Model
 {
     public class CodeFile
     {

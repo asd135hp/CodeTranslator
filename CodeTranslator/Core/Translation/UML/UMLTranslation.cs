@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-using CodeTranslator.Core.Model;
+using CodeTranslator.Model;
 using CodeTranslator.Core.Output;
 
 namespace CodeTranslator.Core.Translation.UML
 {
-    internal class UMLTranslation : ITranslation
+    public sealed class UMLTranslation : ITranslation
     {
         public GenericOutput GetOutput(CodeFile codeFile)
         {

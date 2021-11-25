@@ -1,20 +1,17 @@
-﻿using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 
-using CodeTranslator.Core.Model;
+using CodeTranslator.Model;
+using CodeTranslator.Model.Tree;
 
 namespace CodeTranslator.Core.Translator.LocalDirectory
 {
-    public class LocalDirectoryTree : DirectoryTree
+    public sealed class LocalDirectoryTree : DirectoryTree
     {
-        private readonly int _depth;
         private const int MAX_DEPTH = 255;
 
         public LocalDirectoryTree(string rootDirectoryPath) : base(rootDirectoryPath)
-        {
-            _depth = 0;
-            PopulateDirectories();
-        }
+        {}
 
         /// <summary>
         /// Hidden constructor for generating child directories objects in the tree recursively
@@ -24,28 +21,24 @@ namespace CodeTranslator.Core.Translator.LocalDirectory
         /// <param name="depth">
         /// Preventing the program from stepping too deep into sub-directories
         /// </param>
-        private LocalDirectoryTree(string rootDirectoryPath, DirectoryTree parentDirectory, int depth)
+        private LocalDirectoryTree(string rootDirectoryPath, DirectoryTree parentDirectory)
             : base(rootDirectoryPath, parentDirectory)
-        {
-            _depth = depth;
-            PopulateDirectories();
-        }
+        {}
 
-        protected override void PopulateDirectories()
+        internal override void PopulateDirectories()
         {
-            // no more than 255 sub-folders to be registered in the tree
-            if (_depth >= MAX_DEPTH) return;
-
-            var childDirs = new List<DirectoryTree>();
+            // no more than 255 sub-folders deep to be registered in the tree
+            if (Depth >= MAX_DEPTH) return;
 
             // add child directories to the enumerator recursively
-            foreach (var childDir in GetDirectoryInfo(FullDirectoryName).Directories)
-                childDirs.Add(new LocalDirectoryTree(childDir.FullName, this, _depth + 1));
-
-            ChildDirectories = childDirs;
+            foreach (var childDir in EnumerateDirectories(FullDirectoryName))
+                AddChildNode(new LocalDirectoryTree(childDir.FullName, this));
         }
 
-        public override CustomDirectoryInfo GetDirectoryInfo(string path)
-            => new CustomDirectoryInfo(new DirectoryInfo(path));
+        internal override IEnumerable<DirectoryInfo> EnumerateDirectories(string path)
+            => new DirectoryInfo(path).EnumerateDirectories();
+
+        internal override IEnumerable<FileInfo> EnumerateFiles(string path)
+            => new DirectoryInfo(path).EnumerateFiles();
     }
 }

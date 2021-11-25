@@ -1,5 +1,5 @@
-﻿using CodeTranslator.Core.Model;
-using CodeTranslator.Core.Output;
+﻿using CodeTranslator.Core.Output;
+using CodeTranslator.Model;
 
 namespace CodeTranslator.Core.Translation
 {

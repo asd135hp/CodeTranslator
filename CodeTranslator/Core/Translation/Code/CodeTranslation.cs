@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 
-using CodeTranslator.Core.Model;
 using CodeTranslator.Core.Output;
 using CodeTranslator.Core.Output.Translated;
 using CodeTranslator.Core.Translation.Code.Model;
+using CodeTranslator.Model;
 using CodeTranslator.Utility;
 
 namespace CodeTranslator.Core.Translation.Code
@@ -12,11 +12,11 @@ namespace CodeTranslator.Core.Translation.Code
     {
         public Language Language { get; set; }
 
-        public ProgressManagement Progress { get; private set; }
+        public ProgressStatus Progress { get; private set; }
 
         public GenericOutput GetOutput(CodeFile codeFile)
         {
-            Progress = ProgressManagement.GetInstance();
+            Progress = Progress.GetInstance();
             var output = new TranslatedCodeFile(codeFile);
 
             Task.Run(() =>

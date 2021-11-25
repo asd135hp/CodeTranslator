@@ -2,7 +2,7 @@
 
 namespace CodeTranslator.Core.Translator.Null
 {
-    internal class NullTranslator : GenericTranslator
+    public sealed class NullTranslator : GenericTranslator
     {
 
     }
