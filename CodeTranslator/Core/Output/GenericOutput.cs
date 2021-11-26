@@ -2,7 +2,7 @@
 
 namespace CodeTranslator.Core.Output
 {
-    public abstract class GenericOutput
+    public abstract class GenericOutput : IOutput
     {
         public readonly CodeFile CodeFile;
 

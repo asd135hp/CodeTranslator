@@ -10,7 +10,7 @@ namespace CodeTranslator.Core.Translation.UML
 {
     public sealed class UMLTranslation : ITranslation
     {
-        public GenericOutput GetOutput(CodeFile codeFile)
+        public IOutput GetOutput(CodeFile codeFile)
         {
             throw new NotImplementedException();
         }

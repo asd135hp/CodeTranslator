@@ -5,6 +5,6 @@ namespace CodeTranslator.Core
 {
     public interface ITranslator
     {
-        public GenericOutput TranslateFile(CodeFile codeFile);
+        public IOutput TranslateFile(CodeFile codeFile);
     }
 }

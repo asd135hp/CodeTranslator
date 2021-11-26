@@ -10,7 +10,7 @@ namespace CodeTranslator.Core
         public DirectoryTree RootDirectory { get; internal set; }
         public ITranslation Translation { get; set; }
 
-        public GenericOutput TranslateFile(CodeFile codeFile)
+        public IOutput TranslateFile(CodeFile codeFile)
             => Translation.GetOutput(codeFile);
     }
 }

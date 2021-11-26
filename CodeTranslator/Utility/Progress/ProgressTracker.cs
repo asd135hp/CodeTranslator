@@ -1,51 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace CodeTranslator.Utility.Progress
 {
-    public class ProgressTracker: IObservable<ProgressStatus>
+    public class ProgressTracker: AsyncTokenWrapper, IObservable<ProgressStatus>
     {
-        private readonly CancellationTokenSource _source = null;
-        private readonly CancellationToken _token;
         private readonly Task _counter = null;
         private readonly List<Action<ProgressTracker>> _externalActions;
         private readonly List<IObserver<ProgressStatus>> _observers;
 
-        private static ProgressTracker _singleton = null;
         private ProgressStatus _progressStatus;
         private List<Task> _currentTasks;
 
+        public bool IsFinished { get; private set; }
+
         public int TrackingInterval { get; set; }
 
-        public static ProgressTracker GetInstance(int trackingInterval)
-        {
-            if (_singleton == null)
-            {
-                _singleton = new ProgressTracker(trackingInterval);
-            }
-            return _singleton;
-        }
-
-        private ProgressTracker(int trackingInterval = 1000)
+        public ProgressTracker(int trackingInterval = 1000) : base()
         {
             TrackingInterval = trackingInterval;
+            IsFinished = false;
 
             _progressStatus = new ProgressStatus();
             _externalActions = new List<Action<ProgressTracker>>();
             _currentTasks = new List<Task>();
 
             // start monitoring completed tasks first before the list even popularized
-            _source = new CancellationTokenSource();
-            _token = _source.Token;
             _counter = Task.Run(async () =>
             {
                 while (_progressStatus.Percentage < 1.0)
                 {
                     if (!_token.IsCancellationRequested)
                     {
+                        // setting up the interval for this tracking loop
+                        await Task.Delay(TrackingInterval);
+
+                        if(_progressStatus.TotalTaskCount != _currentTasks.Count)
+                            _progressStatus.TotalTaskCount = _currentTasks.Count;
+
                         // count completed tasks first
                         CountCompletedTasks();
 
@@ -54,9 +48,6 @@ namespace CodeTranslator.Utility.Progress
 
                         // inform all observers about the change
                         foreach (var observer in _observers) observer.OnNext(_progressStatus);
-
-                        // setting up the interval for this tracking loop
-                        await Task.Delay(TrackingInterval);
 
                         continue;
                     }
@@ -72,7 +63,7 @@ namespace CodeTranslator.Utility.Progress
                     foreach (var observer in _observers)
                         observer.OnCompleted();
 
-                _singleton.CleanUp();
+                CleanUp();
             }, _token);
         }
 
@@ -85,10 +76,7 @@ namespace CodeTranslator.Utility.Progress
         public void AddTask(Task newTask)
         {
             if (!_currentTasks.Contains(newTask))
-            {
                 _currentTasks.Add(newTask);
-                _progressStatus.TotalTaskCount = _currentTasks.Count;
-            }
         }
 
         /// <summary>
@@ -98,7 +86,6 @@ namespace CodeTranslator.Utility.Progress
         public void AddTask(params Task[] newTasks)
         {
             foreach(var task in newTasks) AddTask(task);
-            _progressStatus.TotalTaskCount = _currentTasks.Count;
         }
 
         /// <summary>
@@ -123,21 +110,27 @@ namespace CodeTranslator.Utility.Progress
             _currentTasks = newList;
         }
 
+        /// <summary>
+        /// Clean up everything when the main task is finished
+        /// </summary>
         private void CleanUp()
         {
             // safely dispose old components
             try
             {
-                _source?.Cancel();
-                _source?.Dispose();
+                CancelAllTasks();
                 _counter?.Dispose();
                 _currentTasks.Clear();
                 _externalActions.Clear();
-                _singleton = null;
+                _observers.Clear();
             }
             catch (Exception e)
             {
                 // log here
+            }
+            finally
+            {
+                IsFinished = true;
             }
         }
 
@@ -148,7 +141,10 @@ namespace CodeTranslator.Utility.Progress
         IDisposable IObservable<ProgressStatus>.Subscribe(IObserver<ProgressStatus> observer)
         {
             if (!_observers.Contains(observer))
+            {
                 _observers.Add(observer);
+                observer.OnNext(_progressStatus);
+            }
 
             return new Unsubscriber(_observers, observer);
         }

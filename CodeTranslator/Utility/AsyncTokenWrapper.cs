@@ -1,11 +1,11 @@
 ﻿using System.Threading;
 
-namespace CodeTranslator.Core.Translation
+namespace CodeTranslator.Utility
 {
     public abstract class AsyncTokenWrapper
     {
         private readonly CancellationTokenSource _source = null;
-        internal readonly CancellationToken _token;
+        protected readonly CancellationToken _token;
 
         public AsyncTokenWrapper()
         {
@@ -13,7 +13,7 @@ namespace CodeTranslator.Core.Translation
             _token = _source.Token;
         }
 
-        public void CancelTranslation()
+        internal void CancelAllTasks()
         {
             _source.Cancel();
             _source.Dispose();

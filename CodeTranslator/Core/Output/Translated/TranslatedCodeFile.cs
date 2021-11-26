@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿using System.Collections.Concurrent;
 using CodeTranslator.Model;
 
 namespace CodeTranslator.Core.Output.Translated
@@ -7,12 +6,12 @@ namespace CodeTranslator.Core.Output.Translated
     public sealed class TranslatedCodeFile : GenericOutput
     {
         private ulong _currentLineIndex;
-        internal readonly Dictionary<ulong, string> TranslatedCodeLines;
+        internal readonly ConcurrentDictionary<ulong, string> TranslatedCodeLines;
 
         public TranslatedCodeFile(CodeFile codeFile) : base(codeFile)
         {
             _currentLineIndex = 0;
-            TranslatedCodeLines = new Dictionary<ulong, string>();
+            TranslatedCodeLines = new ConcurrentDictionary<ulong, string>();
         }
 
         /// <summary>

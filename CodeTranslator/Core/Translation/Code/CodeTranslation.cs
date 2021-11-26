@@ -4,39 +4,42 @@ using CodeTranslator.Core.Output;
 using CodeTranslator.Core.Output.Translated;
 using CodeTranslator.Core.Translation.Code.Model;
 using CodeTranslator.Model;
-using CodeTranslator.Utility;
+using CodeTranslator.Utility.Progress;
 
 namespace CodeTranslator.Core.Translation.Code
 {
-    public class CodeTranslation : AsyncTokenWrapper, ITranslation
+    public class CodeTranslation : ITranslation
     {
         public Language Language { get; set; }
 
-        public ProgressStatus Progress { get; private set; }
+        public ProgressTracker Progress { get; private set; }
 
-        public GenericOutput GetOutput(CodeFile codeFile)
+        public CodeTranslation() : base()
         {
-            Progress = Progress.GetInstance();
+            Progress = null;
+        }
+
+        public IOutput GetOutput(CodeFile codeFile)
+        {
+            Progress = new ProgressTracker();
             var output = new TranslatedCodeFile(codeFile);
 
-            Task.Run(() =>
+            ulong count = 0;
+            foreach (string codeLine in codeFile.CodeLines)
             {
-                ulong count = 0;
-                foreach(string codeLine in codeFile.CodeLines)
+                Progress.AddTask(Task.Run(() =>
                 {
                     // somehow translate the line - TODO
                     var translatedCodeLine = "";
 
-                    output.TranslatedCodeLines[count] = translatedCodeLine;
+                    output.TranslatedCodeLines.AddOrUpdate(
+                        count,
+                        translatedCodeLine,
+                        (lineNumber, oldCodeLine) => translatedCodeLine);
+                }));
 
-                    // end translation
-                    if (_token.IsCancellationRequested) break;
-                    count++;
-                }
-
-                // dispose the progress management object
-                Progress.Dispose();
-            }, _token);
+                count++;
+            }
 
             return output;
         }

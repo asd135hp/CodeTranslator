@@ -2,8 +2,8 @@
 {
     public struct ProgressStatus
     {
-        public int TasksCompleted { get; internal set; }
-        public int TotalTaskCount { get; internal set; }
+        public int TasksCompleted { get; set; }
+        public int TotalTaskCount { get; set; }
 
         public double Percentage => TotalTaskCount == 0 ? 0 : TasksCompleted / TotalTaskCount;
         public string AsString => $"{TasksCompleted}/{TotalTaskCount}";
