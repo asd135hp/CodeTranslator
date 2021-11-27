@@ -9,40 +9,69 @@ namespace CodeTranslator.Model.Github
 {
     public sealed class GithubDirectoryInfo : GithubTreeItem
     {
+        private readonly string _name;
+
         public GithubDirectoryInfo Parent { get; private set; }
 
+        public override string Name => _name;
+        public override string Extension => "";
+
         /// <summary>
         /// Public (and private for specific user) Github directory reader
         /// </summary>
         /// <param name="githubUrl"></param>
-        /// <param name="commitSHA"></param>
         /// <param name="accessToken"></param>
-        /// <exception cref="UriFormatException"></exception>
-        /// <exception cref="GithubRepoNotFoundException"></exception>
         public GithubDirectoryInfo(
             string githubUrl,
-            string commitSHA,
-            string branch = DEFAULT_MAIN_BRANCH)
-            : base(new Uri(githubUrl), commitSHA, branch)
-        {
-
-        }
+            string accessToken)
+            : this(new Uri(githubUrl), accessToken, DEFAULT_MAIN_BRANCH) { }
 
         /// <summary>
         /// Public (and private for specific user) Github directory reader
         /// </summary>
         /// <param name="githubUrl"></param>
-        /// <param name="commitSHA"></param>
         /// <param name="accessToken"></param>
-        /// <exception cref="UriFormatException"></exception>
-        /// <exception cref="GithubRepoNotFoundException"></exception>
         public GithubDirectoryInfo(
             Uri githubUrl,
-            string commitSHA,
-            string branch = DEFAULT_MAIN_BRANCH)
-            : base(githubUrl, commitSHA, branch)
-        {
+            string accessToken)
+            : this(githubUrl, accessToken, DEFAULT_MAIN_BRANCH) { }
 
+        /// <summary>
+        /// Public (and private for specific user) Github directory reader
+        /// </summary>
+        /// <param name="githubUrl"></param>
+        /// <param name="branch"></param>
+        /// <param name="accessToken"></param>
+        public GithubDirectoryInfo(
+            string githubUrl,
+            string accessToken,
+            string branch = DEFAULT_MAIN_BRANCH)
+            : this(new Uri(githubUrl), accessToken, branch) { }
+
+        /// <summary>
+        /// Public (and private for specific user) Github directory reader
+        /// </summary>
+        /// <param name="githubUrl"></param>
+        /// <param name="branch"></param>
+        /// <param name="accessToken"></param>
+        public GithubDirectoryInfo(
+            Uri githubUrl,
+            string accessToken,
+            string branch = DEFAULT_MAIN_BRANCH)
+            : this(githubUrl, accessToken, branch, null) { }
+
+        internal GithubDirectoryInfo(
+            Uri githubUrl,
+            string accessToken,
+            string branch,
+            Commit parentCommit)
+            : base(githubUrl, accessToken, branch, parentCommit)
+        {
+            // even Uri object determine the link as a file so
+            // it will be an error then
+            if (Exists && !githubUrl.IsFile)
+                _name = githubUrl.Segments.Last().Trim().Trim('/', '\\');
+            else _exists = false;
         }
 
         /// <summary>
@@ -65,9 +94,10 @@ namespace CodeTranslator.Model.Github
                 if (treeItem.Type == TreeType.Tree)
                 {
                     var url = BuildURL(treeItem.Path);
-                    list.Add(new GithubDirectoryInfo(url, treeItem.Sha)
+                    list.Add(new GithubDirectoryInfo(url, "", Branch, CommitReference)
                     {
-                        Parent = this
+                        Parent = this,
+                        TreeSHA = treeItem.Sha
                     });
                 }
 
@@ -94,7 +124,7 @@ namespace CodeTranslator.Model.Github
                 if (treeItem.Type == TreeType.Blob)
                 {
                     var url = BuildURL(treeItem.Path);
-                    list.Add(new GithubFileInfo(url, treeItem.Sha)
+                    list.Add(new GithubFileInfo(url, "", Branch, CommitReference)
                     {
                         Directory = this
                     });

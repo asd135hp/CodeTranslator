@@ -26,6 +26,7 @@ namespace CodeTranslator.Utility.Progress
             _progressStatus = new ProgressStatus();
             _externalActions = new List<Action<ProgressTracker>>();
             _currentTasks = new List<Task>();
+            _observers = new List<IObserver<ProgressStatus>>();
 
             // start monitoring completed tasks first before the list even popularized
             _counter = Task.Run(async () =>
