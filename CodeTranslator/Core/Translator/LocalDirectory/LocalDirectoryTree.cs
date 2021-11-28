@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
-using CodeTranslator.Model;
 using CodeTranslator.Model.Tree;
 
 namespace CodeTranslator.Core.Translator.LocalDirectory
@@ -9,6 +9,9 @@ namespace CodeTranslator.Core.Translator.LocalDirectory
     public sealed class LocalDirectoryTree : DirectoryTree
     {
         private const int MAX_DEPTH = 255;
+        private IEnumerable<FileInfo> _files;
+
+        public IEnumerable<FileInfo> Files => _files;
 
         public LocalDirectoryTree(string rootDirectoryPath) : base(rootDirectoryPath)
         {}
@@ -25,20 +28,23 @@ namespace CodeTranslator.Core.Translator.LocalDirectory
             : base(rootDirectoryPath, parentDirectory)
         {}
 
-        internal override void PopulateDirectories()
+        /// <summary>
+        /// Populate directory tree on demand instead of recursively to save performance
+        /// </summary>
+        public override Task PopulateAll()
         {
             // no more than 255 sub-folders deep to be registered in the tree
-            if (Depth >= MAX_DEPTH) return;
+            if (Depth >= MAX_DEPTH) return Task.Run(() => { });
+            var dirInfo = new DirectoryInfo(FullDirectoryName);
 
             // add child directories to the enumerator recursively
-            foreach (var childDir in EnumerateDirectories(FullDirectoryName))
+            foreach (var childDir in dirInfo.EnumerateDirectories())
                 AddChildNode(new LocalDirectoryTree(childDir.FullName, this));
+
+            // add files to the enumerator recursively
+            _files = dirInfo.EnumerateFiles();
+
+            return Task.Run(() => { });
         }
-
-        internal override IEnumerable<DirectoryInfo> EnumerateDirectories(string path)
-            => new DirectoryInfo(path).EnumerateDirectories();
-
-        internal override IEnumerable<FileInfo> EnumerateFiles(string path)
-            => new DirectoryInfo(path).EnumerateFiles();
     }
 }

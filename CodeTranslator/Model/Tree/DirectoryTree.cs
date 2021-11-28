@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.IO;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 
 namespace CodeTranslator.Model.Tree
@@ -9,7 +9,6 @@ namespace CodeTranslator.Model.Tree
     {
         public readonly string FullDirectoryName;
         public readonly string FolderName;
-        public readonly IEnumerable<FileInfo> Files;
 
         public DirectoryInfo CurrentDirectoryInfo => new DirectoryInfo(FullDirectoryName);
 
@@ -17,8 +16,6 @@ namespace CodeTranslator.Model.Tree
         {
             FullDirectoryName = rootDirectoryPath;
             FolderName = new Regex("[\\/\\\\]").Split(rootDirectoryPath).Last();
-            Files = EnumerateFiles(rootDirectoryPath);
-            PopulateDirectories();
         }
 
         protected DirectoryTree(string rootDirectoryPath, DirectoryTree parentDirectory)
@@ -31,10 +28,6 @@ namespace CodeTranslator.Model.Tree
         /// From given information in DirectoryTree,
         /// generate all possible child directories and their files
         /// </summary>
-        internal abstract void PopulateDirectories();
-
-        internal abstract IEnumerable<DirectoryInfo> EnumerateDirectories(string path);
-
-        internal abstract IEnumerable<FileInfo> EnumerateFiles(string path);
+        public abstract Task PopulateAll();
     }
 }

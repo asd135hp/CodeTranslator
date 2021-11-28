@@ -20,21 +20,39 @@ namespace CodeTranslator.Model.Github
         /// Public (and private for specific user) Github file reader
         /// </summary>
         /// <param name="githubUrl"></param>
+        /// <param name="commitReference"></param>
         /// <param name="accessToken"></param>
         public GithubFileInfo(
             string githubUrl,
+            string commitReference,
             string accessToken)
-            : this(new Uri(githubUrl), accessToken, DEFAULT_MAIN_BRANCH) { }
+            : this(new Uri(githubUrl), commitReference, accessToken, "") { }
 
         /// <summary>
         /// Public (and private for specific user) Github file reader
         /// </summary>
         /// <param name="githubUrl"></param>
+        /// <param name="commitReference"></param>
         /// <param name="accessToken"></param>
         public GithubFileInfo(
             Uri githubUrl,
+            string commitReference,
             string accessToken)
-            : this(githubUrl, accessToken, DEFAULT_MAIN_BRANCH) { }
+            : this(githubUrl, commitReference, accessToken, "") { }
+
+        /// <summary>
+        /// Public (and private for specific user) Github file reader
+        /// </summary>
+        /// <param name="githubUrl"></param>
+        /// <param name="commitReference"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="branch"></param>
+        public GithubFileInfo(
+            string githubUrl,
+            string commitReference,
+            string accessToken,
+            string branch)
+            : this(new Uri(githubUrl), commitReference, accessToken, branch) { }
 
         /// <summary>
         /// Public (and private for specific user) Github file reader
@@ -42,44 +60,33 @@ namespace CodeTranslator.Model.Github
         /// <param name="githubUrl"></param>
         /// <param name="branch"></param>
         /// <param name="accessToken"></param>
-        public GithubFileInfo(
-            string githubUrl,
-            string accessToken,
-            string branch = DEFAULT_MAIN_BRANCH)
-            : this(new Uri(githubUrl), accessToken, branch) { }
-
-        /// <summary>
-        /// Public (and private for specific user) Github file reader
-        /// </summary>
-        /// <param name="githubUrl"></param>
         /// <param name="branch"></param>
-        /// <param name="accessToken"></param>
         public GithubFileInfo(
             Uri githubUrl,
+            string commitReference,
             string accessToken,
-            string branch = DEFAULT_MAIN_BRANCH)
-            : this(githubUrl, accessToken, branch, null)
+            string branch)
+            : this(new GithubAPIInfo()
+                  .SetAccessToken(accessToken)
+                  .SetGithubUrl(githubUrl)
+                  .SetCommit(commitReference)
+                  .SetBranch(branch)) { }
+
+        public GithubFileInfo(GithubAPIInfo apiInfo) : base(apiInfo)
         {
-            var segments = githubUrl.Segments;
+            var segments = apiInfo.Url.Segments;
             // set up name and extension of this tree item if possible
-            if (segments.Length > 5 && Exists && githubUrl.IsFile)
+            if (segments.Length > 5 && Exists)
             {
-                string fileName = segments.Last(),
-                    namePrefix = fileName[0] == '.' ? "." : "";
-                var splittedFileName = fileName.Split('.').ToList();
+                var fileName = segments.Last(); 
+                var nameParts = fileName.Split('.').ToList();
+                var namePrefix = fileName[0] == '.' && nameParts[0].Length != 0 ? "." : "";
 
-                _extension = splittedFileName.Last();
-                splittedFileName.RemoveAt(splittedFileName.Count - 1);
-                _name = $"{namePrefix}{string.Join(".", splittedFileName)}";
+                _extension = nameParts.Last();
+                nameParts.RemoveAt(nameParts.Count - 1);
+                _name = $"{namePrefix}{string.Join(".", nameParts)}";
             }
             else _exists = false;
         }
-
-        internal GithubFileInfo(
-            Uri githubUrl,
-            string accessToken,
-            string branch,
-            Commit parentCommit)
-            : base(githubUrl, accessToken, branch, parentCommit) { }
     }
 }

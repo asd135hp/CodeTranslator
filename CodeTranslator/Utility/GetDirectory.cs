@@ -28,5 +28,10 @@ namespace CodeTranslator.Utility
         /// Debugging purposes. Don't use this in Release.
         /// </summary>
         public static string ProjectDirectory => GetDirectoryFullName(2);
+
+        /// <summary>
+        /// Debugging purposes. Don't use this in Release.
+        /// </summary>
+        public static string SolutionDirectory => GetDirectoryFullName(3);
     }
 }

@@ -9,6 +9,7 @@ namespace CodeTranslator.Model.Github
 {
     public sealed class GithubDirectoryInfo : GithubTreeItem
     {
+        private IEnumerable<TreeItem> _cache;
         private readonly string _name;
 
         public GithubDirectoryInfo Parent { get; private set; }
@@ -20,58 +21,66 @@ namespace CodeTranslator.Model.Github
         /// Public (and private for specific user) Github directory reader
         /// </summary>
         /// <param name="githubUrl"></param>
+        /// <param name="commitReference"></param>
         /// <param name="accessToken"></param>
         public GithubDirectoryInfo(
             string githubUrl,
+            string commitReference,
             string accessToken)
-            : this(new Uri(githubUrl), accessToken, DEFAULT_MAIN_BRANCH) { }
+            : this(new Uri(githubUrl), commitReference, accessToken, "") { }
 
         /// <summary>
         /// Public (and private for specific user) Github directory reader
         /// </summary>
         /// <param name="githubUrl"></param>
+        /// <param name="commitReference"></param>
         /// <param name="accessToken"></param>
         public GithubDirectoryInfo(
             Uri githubUrl,
+            string commitReference,
             string accessToken)
-            : this(githubUrl, accessToken, DEFAULT_MAIN_BRANCH) { }
+            : this(githubUrl, commitReference, accessToken, "") { }
 
         /// <summary>
         /// Public (and private for specific user) Github directory reader
         /// </summary>
         /// <param name="githubUrl"></param>
-        /// <param name="branch"></param>
+        /// <param name="commitReference"></param>
         /// <param name="accessToken"></param>
+        /// <param name="branch"></param>
         public GithubDirectoryInfo(
             string githubUrl,
+            string commitReference,
             string accessToken,
-            string branch = DEFAULT_MAIN_BRANCH)
-            : this(new Uri(githubUrl), accessToken, branch) { }
+            string branch)
+            : this(new Uri(githubUrl), commitReference, accessToken, branch) { }
 
         /// <summary>
         /// Public (and private for specific user) Github directory reader
         /// </summary>
         /// <param name="githubUrl"></param>
-        /// <param name="branch"></param>
+        /// <param name="commitReference"></param>
         /// <param name="accessToken"></param>
+        /// <param name="branch"></param>
         public GithubDirectoryInfo(
             Uri githubUrl,
+            string commitReference,
             string accessToken,
-            string branch = DEFAULT_MAIN_BRANCH)
-            : this(githubUrl, accessToken, branch, null) { }
+            string branch)
+            : this(new GithubAPIInfo()
+                  .SetAccessToken(accessToken)
+                  .SetGithubUrl(githubUrl)
+                  .SetCommit(commitReference)
+                  .SetBranch(branch)) { }
 
-        internal GithubDirectoryInfo(
-            Uri githubUrl,
-            string accessToken,
-            string branch,
-            Commit parentCommit)
-            : base(githubUrl, accessToken, branch, parentCommit)
+        /// <summary>
+        /// Public (and private for specific user) Github directory reader
+        /// </summary>
+        /// <param name="apiInfo"></param>
+        public GithubDirectoryInfo(GithubAPIInfo apiInfo) : base(apiInfo)
         {
-            // even Uri object determine the link as a file so
-            // it will be an error then
-            if (Exists && !githubUrl.IsFile)
-                _name = githubUrl.Segments.Last().Trim().Trim('/', '\\');
-            else _exists = false;
+            if (Exists) _name = apiInfo.Url.Segments.Last().Trim().Trim('/', '\\');
+            _cache = null;
         }
 
         /// <summary>
@@ -87,19 +96,23 @@ namespace CodeTranslator.Model.Github
         /// <returns></returns>
         public async Task<IEnumerable<GithubDirectoryInfo>> EnumerateDirectories()
         {
-            var treeResponse = await FetchGitHubTree();
             var list = new List<GithubDirectoryInfo>();
+            _cache ??= (await FetchGitHubTree())?.Tree;
 
-            foreach(var treeItem in treeResponse.Tree)
-                if (treeItem.Type == TreeType.Tree)
-                {
-                    var url = BuildURL(treeItem.Path);
-                    list.Add(new GithubDirectoryInfo(url, "", Branch, CommitReference)
+            if(_cache != null)
+                foreach(var treeItem in _cache)
+                    if (treeItem.Type == TreeType.Tree)
                     {
-                        Parent = this,
-                        TreeSHA = treeItem.Sha
-                    });
-                }
+                        var url = APIInfo.GetChildUrl(AbsolutePath, treeItem.Path);
+                        var apiInfo = (APIInfo.Clone() as GithubAPIInfo)
+                            .SetGithubUrl(url)
+                            .SetTreeReference(treeItem.Sha);
+
+                        list.Add(new GithubDirectoryInfo(apiInfo)
+                        {
+                            Parent = this
+                        });
+                    }
 
             return list;
         }
@@ -117,18 +130,23 @@ namespace CodeTranslator.Model.Github
         /// <returns></returns>
         public async Task<IEnumerable<GithubFileInfo>> EnumerateFiles()
         {
-            var treeResponse = await FetchGitHubTree();
             var list = new List<GithubFileInfo>();
+            _cache ??= (await FetchGitHubTree())?.Tree;
 
-            foreach (var treeItem in treeResponse.Tree)
-                if (treeItem.Type == TreeType.Blob)
-                {
-                    var url = BuildURL(treeItem.Path);
-                    list.Add(new GithubFileInfo(url, "", Branch, CommitReference)
+            if (_cache != null)
+                foreach (var treeItem in _cache)
+                    if (treeItem.Type == TreeType.Blob)
                     {
-                        Directory = this
-                    });
-                }
+                        var url = APIInfo.GetChildUrl(AbsolutePath, treeItem.Path);
+                        var apiInfo = (APIInfo.Clone() as GithubAPIInfo)
+                            .SetGithubUrl(url)
+                            .SetTreeReference(treeItem.Sha);
+
+                        list.Add(new GithubFileInfo(apiInfo)
+                        {
+                            Directory = this
+                        });
+                    }
 
             return list;
         }

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
+using System.Threading.Tasks;
 
-using CodeTranslator.Model;
+using CodeTranslator.Model.Github;
 using CodeTranslator.Model.Tree;
 
 namespace CodeTranslator.Core.Translator.Github
@@ -11,6 +10,11 @@ namespace CodeTranslator.Core.Translator.Github
     public sealed class GithubDirectoryTree : DirectoryTree
     {
         private const int MAX_DEPTH = 255;
+        private IEnumerable<GithubFileInfo> _files;
+        private readonly GithubDirectoryInfo _nodeInfo;
+
+        public IEnumerable<GithubFileInfo> Files => _files;
+        public GithubDirectoryInfo Info => _nodeInfo;
         
         public GithubDirectoryTree(string rootDirectoryPath) : base(rootDirectoryPath)
         {
@@ -21,20 +25,21 @@ namespace CodeTranslator.Core.Translator.Github
         {
         }
 
-        internal override IEnumerable<DirectoryInfo> EnumerateDirectories(string path)
+        //??
+        public override async Task PopulateAll()
         {
-            throw new NotImplementedException();
-        }
-
-        internal override void PopulateDirectories()
-        {
+            // no more than 255 sub-folders deep to be registered in the tree
             if (Depth >= MAX_DEPTH) return;
-            throw new NotImplementedException();
-        }
 
-        internal override IEnumerable<FileInfo> EnumerateFiles(string path)
-        {
-            throw new NotImplementedException();
+            // add child directories to the enumerator recursively
+            foreach (var childDir in await _nodeInfo.EnumerateDirectories())
+                AddChildNode(new GithubDirectoryTree(
+                    "",
+                    this
+                ));
+
+            // add files to the enumerator recursively
+            _files = await _nodeInfo.EnumerateFiles();
         }
     }
 }

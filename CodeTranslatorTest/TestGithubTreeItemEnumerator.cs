@@ -1,28 +1,36 @@
 ﻿using NUnit.Framework;
-using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using CodeTranslator.Model.Github;
+using CodeTranslator.Utility;
 
 namespace CodeTranslatorTest
 {
     internal class TestGithubTreeItemEnumerator
     {
+        private const int DEPTH = 5;
         private string githubRepo = "https://github.com/graphql-dotnet/graphql-dotnet";
         private string commitSHA = "a4803cf69cf083a6754e52cdb7b0ade5e5094375";
-        private string accessToken = "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";
+        private string accessToken = File.ReadAllText(
+            $"{GetDirectory.ProjectDirectory}\\token.txt");
 
-        private async Task EnumerateInfo(GithubDirectoryInfo rootDir, bool recursive = false)
+        private async Task EnumerateInfo(GithubDirectoryInfo rootDir, bool recursive = false, int depth = 0)
         {
-            foreach (var dirInfo in await rootDir.EnumerateDirectories())
+            if (depth > DEPTH) return;
+
+            var dirs = await rootDir.EnumerateDirectories();
+            foreach (var dirInfo in dirs)
             {
                 TestContext.Out.WriteLine(
                     "Absolute path: {0}; Name: {1}",
                     dirInfo.AbsolutePath,
-                    dirInfo.Name + '.' + dirInfo.Extension);
-                if (recursive) await EnumerateInfo(dirInfo, true);
+                    dirInfo.Name);
+                if (recursive) await EnumerateInfo(dirInfo, true, depth + 1);
             }
 
-            foreach (var dirInfo in await rootDir.EnumerateFiles())
+            var files = await rootDir.EnumerateFiles();
+            foreach (var dirInfo in files)
             {
                 TestContext.Out.WriteLine(
                     "Absolute path: {0}; Name: {1}",
@@ -41,10 +49,9 @@ namespace CodeTranslatorTest
         {
             Assert.DoesNotThrowAsync(async () =>
             {
-                await EnumerateInfo(new GithubDirectoryInfo(githubRepo, accessToken)
-                {
-                    CommitSHA = commitSHA
-                });
+                await EnumerateInfo(
+                    new GithubDirectoryInfo(githubRepo, commitSHA, accessToken)
+                );
             });
         }
 
@@ -53,10 +60,10 @@ namespace CodeTranslatorTest
         {
             Assert.DoesNotThrowAsync(async () =>
             {
-                await EnumerateInfo(new GithubDirectoryInfo(githubRepo, accessToken)
-                {
-                    CommitSHA = commitSHA
-                }, true);
+                await EnumerateInfo(
+                    new GithubDirectoryInfo(githubRepo, commitSHA, accessToken),
+                    true
+                );
             });
         }
     }

@@ -1,9 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using CodeTranslator.Core.Output;
 using CodeTranslator.Core.Output.Translated;
 using CodeTranslator.Core.Translation.Code.Model;
 using CodeTranslator.Model;
+using CodeTranslator.Utility;
 using CodeTranslator.Utility.Progress;
 
 namespace CodeTranslator.Core.Translation.Code
@@ -43,5 +45,7 @@ namespace CodeTranslator.Core.Translation.Code
 
             return output;
         }
+
+        public IObservable<ProgressStatus> GetObservableProgressTracker() => Progress;
     }
 }
