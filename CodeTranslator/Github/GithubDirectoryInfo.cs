@@ -3,12 +3,14 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using CodeTranslator.Model;
 using Octokit;
 
-namespace CodeTranslator.Model.Github
+namespace CodeTranslator.Github
 {
     public sealed class GithubDirectoryInfo : GithubTreeItem
     {
+        // could be a problem???
         private IEnumerable<TreeItem> _cache;
         private readonly string _name;
 
@@ -95,27 +97,12 @@ namespace CodeTranslator.Model.Github
         /// </summary>
         /// <returns></returns>
         public async Task<IEnumerable<GithubDirectoryInfo>> EnumerateDirectories()
-        {
-            var list = new List<GithubDirectoryInfo>();
-            _cache ??= (await FetchGitHubTree())?.Tree;
-
-            if(_cache != null)
-                foreach(var treeItem in _cache)
-                    if (treeItem.Type == TreeType.Tree)
-                    {
-                        var url = APIInfo.GetChildUrl(AbsolutePath, treeItem.Path);
-                        var apiInfo = (APIInfo.Clone() as GithubAPIInfo)
-                            .SetGithubUrl(url)
-                            .SetTreeReference(treeItem.Sha);
-
-                        list.Add(new GithubDirectoryInfo(apiInfo)
-                        {
-                            Parent = this
-                        });
-                    }
-
-            return list;
-        }
+            => await FetchTreeItems(
+                TreeType.Tree,
+                apiInfo => new GithubDirectoryInfo(apiInfo)
+                {
+                    Parent = this
+                });
 
         /// <summary>
         /// Async-based method for enumerating files by fetching data with Github API
@@ -128,24 +115,57 @@ namespace CodeTranslator.Model.Github
         /// Async-based method for enumerating files by fetching data with Github API
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<GithubFileInfo>> EnumerateFiles()
+        public async Task<IEnumerable<GithubFileInfo>> EnumerateFiles(
+            params string[] ignoredExtensions)
+            => await FetchTreeItems(
+                TreeType.Blob,
+                apiInfo => new GithubFileInfo(apiInfo)
+                {
+                    Directory = this
+                },
+                treeItem =>
+                {
+                    var extension = treeItem.Path.Split('.')[1];
+                    return ignoredExtensions.Contains(extension);
+                });
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private async Task<TreeResponse> FetchGitHubTree()
+            => Exists ? await APIInfo.FetchTree() : null;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="childPath"></param>
+        /// <returns></returns>
+        private Uri GetUrl(string childPath)
+            => new Uri($"https://github.com/{APIInfo.Owner}/{APIInfo.RepositoryName}" +
+                $"/tree/{APIInfo.Branch}/{AbsolutePath}/{childPath}");
+
+        private async Task<IEnumerable<T>> FetchTreeItems<T>(
+            TreeType type,
+            Func<GithubAPIInfo, T> generateObj,
+            Func<TreeItem, bool> filter = default)
+            where T : GithubTreeItem
         {
-            var list = new List<GithubFileInfo>();
+            var list = new List<T>();
             _cache ??= (await FetchGitHubTree())?.Tree;
 
             if (_cache != null)
                 foreach (var treeItem in _cache)
-                    if (treeItem.Type == TreeType.Blob)
+                    if (treeItem.Type == type)
                     {
-                        var url = APIInfo.GetChildUrl(AbsolutePath, treeItem.Path);
+                        if (filter?.Invoke(treeItem) ?? false) continue;
+
+                        var url = GetUrl(treeItem.Path);
                         var apiInfo = (APIInfo.Clone() as GithubAPIInfo)
                             .SetGithubUrl(url)
                             .SetTreeReference(treeItem.Sha);
 
-                        list.Add(new GithubFileInfo(apiInfo)
-                        {
-                            Directory = this
-                        });
+                        list.Add(generateObj.Invoke(apiInfo));
                     }
 
             return list;

@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
-using CodeTranslator.Core.Translation.Code.Model;
+using CodeTranslator.Model;
 
 namespace CodeTranslator.Core.Translation.Code
 {

@@ -1,23 +1,23 @@
 ﻿using System.IO;
 using System.Collections.Generic;
 
-using CodeTranslator.Model.Tree;
+using CodeTranslator.Tree;
 
 namespace CodeTranslator.Model
 {
     public class CodeFile
     {
-        internal FileInfo Info { get; set; }
+        internal FileInfo Info { get; private set; }
         public DirectoryTree CurrentDirectory { get; internal set; }
         public IEnumerable<string> CodeLines { get; private set; }
         public int LineCount { get; private set; }
 
-        public CodeFile()
+        public CodeFile(FileInfo info)
         {
-            if (Info == null)
+            if (info == null)
                 throw new IOException("Could not get info of code file");
 
-            var readerStream = Info.OpenText();
+            var readerStream = info.OpenText();
             var codeLines = new List<string>();
 
             while (true)
@@ -27,6 +27,7 @@ namespace CodeTranslator.Model
                 codeLines.Add(codeLine);
             }
 
+            Info = info;
             CodeLines = codeLines;
             LineCount = codeLines.Count;
         }

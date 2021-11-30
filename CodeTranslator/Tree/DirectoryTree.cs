@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 
-namespace CodeTranslator.Model.Tree
+namespace CodeTranslator.Tree
 {
     public abstract class DirectoryTree : NTree
     {

@@ -1,7 +1,4 @@
-﻿using CodeTranslator.Core.Translator.Github;
-using CodeTranslator.Core.Translator.LocalDirectory;
-using CodeTranslator.Core.Translator.SingleFile;
-using CodeTranslator.Core.Translator.Null;
+﻿using CodeTranslator.Core.Translator;
 
 namespace CodeTranslator.Core
 {

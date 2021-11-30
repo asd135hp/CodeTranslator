@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace CodeTranslator.Core.Translator.LocalDirectory
+namespace CodeTranslator.Core.Translator
 {
     public sealed class LocalDirectoryTranslator : GenericTranslator
     {

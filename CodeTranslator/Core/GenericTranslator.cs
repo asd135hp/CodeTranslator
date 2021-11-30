@@ -1,7 +1,7 @@
 ﻿using CodeTranslator.Core.Output;
 using CodeTranslator.Core.Translation;
 using CodeTranslator.Model;
-using CodeTranslator.Model.Tree;
+using CodeTranslator.Tree;
 
 namespace CodeTranslator.Core
 {

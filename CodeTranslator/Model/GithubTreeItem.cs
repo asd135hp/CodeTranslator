@@ -1,9 +1,8 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
-
+using CodeTranslator.Github;
 using Octokit;
 
-namespace CodeTranslator.Model.Github
+namespace CodeTranslator.Model
 {
     public abstract class GithubTreeItem
     {
@@ -11,9 +10,13 @@ namespace CodeTranslator.Model.Github
         private readonly string _absolutePath;
         private readonly GithubAPIInfo _apiInfo;
 
+        internal GithubAPIInfo APIInfo => _apiInfo;
+
         public bool Exists => _exists;
+        public string Sha => _apiInfo.TreeSHA;
         public string AbsolutePath => _absolutePath;
-        public GithubAPIInfo APIInfo => _apiInfo;
+        public string AbsoluteUrl => _apiInfo.Url.AbsoluteUri;
+        public RateLimit RateLimit => _apiInfo.RateLimit;
 
         public abstract string Name { get; }
         public abstract string Extension { get; }
@@ -31,12 +34,5 @@ namespace CodeTranslator.Model.Github
             if(segments.Length > 5 && Exists)
                 _absolutePath = string.Join("", segments.Skip(5)).Trim().TrimEnd('/', '\\');
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        protected async Task<TreeResponse> FetchGitHubTree()
-            => Exists ? await _apiInfo.FetchTree() : null;
     }
 }

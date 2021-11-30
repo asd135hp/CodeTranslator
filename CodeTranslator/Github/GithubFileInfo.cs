@@ -1,20 +1,22 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-using Octokit;
+using CodeTranslator.Model;
 
-namespace CodeTranslator.Model.Github
+namespace CodeTranslator.Github
 {
-    public sealed class GithubFileInfo : GithubTreeItem
+    public sealed class GithubFileInfo : GithubTreeItem, IDisposable
     {
-        private readonly string _name, _extension;
+        private const string STORING_FOLDER = "tmp";
+
+        private readonly FileName _fileName;
+        private readonly string _filePath;
 
         public GithubDirectoryInfo Directory { get; internal set; }
 
-        public override string Name => _name;
-        public override string Extension => _extension;
+        public override string Name => _fileName.Name;
+        public override string Extension => _fileName.Extension;
 
         /// <summary>
         /// Public (and private for specific user) Github file reader
@@ -76,17 +78,32 @@ namespace CodeTranslator.Model.Github
         {
             var segments = apiInfo.Url.Segments;
             // set up name and extension of this tree item if possible
-            if (segments.Length > 5 && Exists)
+            if (Exists)
             {
-                var fileName = segments.Last(); 
-                var nameParts = fileName.Split('.').ToList();
-                var namePrefix = fileName[0] == '.' && nameParts[0].Length != 0 ? "." : "";
+                if (segments.Length > 5)
+                    _fileName = new FileName(segments.Last());
 
-                _extension = nameParts.Last();
-                nameParts.RemoveAt(nameParts.Count - 1);
-                _name = $"{namePrefix}{string.Join(".", nameParts)}";
+                // start fetching content of the file
+                _filePath = $"{STORING_FOLDER}\\{apiInfo.TreeSHA}.tmp";
+                System.IO.Directory.CreateDirectory(STORING_FOLDER);
+                if (File.Exists(_filePath))
+                    File.WriteAllText(_filePath, "");
+
+                foreach (var repoContent in this.AwaitTask(apiInfo.FetchFileContent(AbsolutePath)))
+                    File.AppendAllText(_filePath, repoContent.Content ?? "");
             }
             else _exists = false;
+        }
+
+        public void ReadFileContents(Action<StreamReader> fileReader)
+        {
+            using var stream = File.OpenText(_filePath);
+            fileReader.Invoke(stream);
+        }
+
+        public void Dispose()
+        {
+            File.Delete(_filePath);
         }
     }
 }

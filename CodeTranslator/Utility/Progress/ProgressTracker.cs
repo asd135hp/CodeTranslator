@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CodeTranslator.Utility.Model;
 
 namespace CodeTranslator.Utility.Progress
 {

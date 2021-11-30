@@ -3,9 +3,8 @@ using System.Threading.Tasks;
 
 using CodeTranslator.Core.Output;
 using CodeTranslator.Core.Output.Translated;
-using CodeTranslator.Core.Translation.Code.Model;
 using CodeTranslator.Model;
-using CodeTranslator.Utility;
+using CodeTranslator.Utility.Model;
 using CodeTranslator.Utility.Progress;
 
 namespace CodeTranslator.Core.Translation.Code

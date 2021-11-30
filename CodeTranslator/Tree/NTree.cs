@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CodeTranslator.Model.Tree
+namespace CodeTranslator.Tree
 {
     public class NTree : IDisposable
     {

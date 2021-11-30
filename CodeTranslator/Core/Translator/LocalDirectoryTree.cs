@@ -2,9 +2,9 @@
 using System.IO;
 using System.Threading.Tasks;
 
-using CodeTranslator.Model.Tree;
+using CodeTranslator.Tree;
 
-namespace CodeTranslator.Core.Translator.LocalDirectory
+namespace CodeTranslator.Core.Translator
 {
     public sealed class LocalDirectoryTree : DirectoryTree
     {
@@ -32,19 +32,18 @@ namespace CodeTranslator.Core.Translator.LocalDirectory
         /// Populate directory tree on demand instead of recursively to save performance
         /// </summary>
         public override Task PopulateAll()
-        {
-            // no more than 255 sub-folders deep to be registered in the tree
-            if (Depth >= MAX_DEPTH) return Task.Run(() => { });
-            var dirInfo = new DirectoryInfo(FullDirectoryName);
+            => Task.Run(() => {
+                // no more than 255 sub-folders deep to be registered in the tree
+                if (Depth >= MAX_DEPTH) return;
 
-            // add child directories to the enumerator recursively
-            foreach (var childDir in dirInfo.EnumerateDirectories())
-                AddChildNode(new LocalDirectoryTree(childDir.FullName, this));
+                var dirInfo = new DirectoryInfo(FullDirectoryName);
 
-            // add files to the enumerator recursively
-            _files = dirInfo.EnumerateFiles();
+                // add child directories to the enumerator recursively
+                foreach (var childDir in dirInfo.EnumerateDirectories())
+                    AddChildNode(new LocalDirectoryTree(childDir.FullName, this));
 
-            return Task.Run(() => { });
-        }
+                // add files to the enumerator recursively
+                _files = dirInfo.EnumerateFiles();
+            });
     }
 }

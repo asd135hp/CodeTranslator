@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CodeTranslator.Core.Translator.Github
+namespace CodeTranslator.Core.Translator
 {
     public sealed class GithubTranslator : GenericTranslator
     {

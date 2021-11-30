@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using CodeTranslator.Model.Github;
-using CodeTranslator.Model.Tree;
+using CodeTranslator.Github;
+using CodeTranslator.Tree;
 
-namespace CodeTranslator.Core.Translator.Github
+namespace CodeTranslator.Core.Translator
 {
     public sealed class GithubDirectoryTree : DirectoryTree
     {
@@ -16,16 +16,30 @@ namespace CodeTranslator.Core.Translator.Github
         public IEnumerable<GithubFileInfo> Files => _files;
         public GithubDirectoryInfo Info => _nodeInfo;
         
-        public GithubDirectoryTree(string rootDirectoryPath) : base(rootDirectoryPath)
+        public GithubDirectoryTree(
+            string repoUrl,
+            string commitReference,
+            string accessToken = "",
+            string branch = "")
+            : base(repoUrl)
         {
+            _nodeInfo = new GithubDirectoryInfo(repoUrl, commitReference, accessToken, branch);
         }
 
-        private GithubDirectoryTree(string rootDirectoryPath, DirectoryTree parentDirectory)
-            : base(rootDirectoryPath, parentDirectory)
+        private GithubDirectoryTree(
+            string subRepoUrl,
+            string treeSha,
+            DirectoryTree parentDirectory)
+            : base(subRepoUrl, parentDirectory)
         {
+            var castedParent = parentDirectory as GithubDirectoryTree;
+            var parentApiInfo = castedParent._nodeInfo.APIInfo.Clone() as GithubAPIInfo;
+            _nodeInfo = new GithubDirectoryInfo(
+                parentApiInfo
+                    .SetGithubUrl(subRepoUrl)
+                    .SetTreeReference(treeSha));
         }
 
-        //??
         public override async Task PopulateAll()
         {
             // no more than 255 sub-folders deep to be registered in the tree
@@ -34,7 +48,8 @@ namespace CodeTranslator.Core.Translator.Github
             // add child directories to the enumerator recursively
             foreach (var childDir in await _nodeInfo.EnumerateDirectories())
                 AddChildNode(new GithubDirectoryTree(
-                    "",
+                    childDir.AbsoluteUrl,
+                    childDir.Sha,
                     this
                 ));
 

@@ -1,6 +1,6 @@
 ﻿
 
-namespace CodeTranslator.Core.Translator.Null
+namespace CodeTranslator.Core.Translator
 {
     public sealed class NullTranslator : GenericTranslator
     {
