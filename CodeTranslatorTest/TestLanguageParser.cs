@@ -1,6 +1,6 @@
 using NUnit.Framework;
 using CodeTranslator.Utility;
-using CodeTranslator.Core.Translation.Code.Model;
+using CodeTranslator.Model;
 
 namespace CodeTranslatorTest
 {
@@ -11,7 +11,7 @@ namespace CodeTranslatorTest
         [SetUp]
         public void Setup()
         {
-            language = Language.Builder()
+            language = Language.Builder
                 .SetDirectory(GetDirectory.ProjectDirectory)
                 .SetLanguageFile("vi.json")
                 .Build();

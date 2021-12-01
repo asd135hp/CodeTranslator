@@ -1,7 +1,6 @@
 ﻿using System;
 using CodeTranslator.Core.Output;
 using CodeTranslator.Model;
-using CodeTranslator.Utility.Model;
 
 namespace CodeTranslator.Core.Translation
 {

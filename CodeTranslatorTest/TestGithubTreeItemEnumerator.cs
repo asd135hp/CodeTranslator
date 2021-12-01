@@ -1,15 +1,14 @@
 ﻿using NUnit.Framework;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using CodeTranslator.Model.Github;
+using CodeTranslator.IO;
 using CodeTranslator.Utility;
 
 namespace CodeTranslatorTest
 {
     internal class TestGithubTreeItemEnumerator
     {
-        private const int DEPTH = 5;
+        private const int DEPTH = 255;
         private string githubRepo = "https://github.com/graphql-dotnet/graphql-dotnet";
         private string commitSHA = "a4803cf69cf083a6754e52cdb7b0ade5e5094375";
         private string accessToken = File.ReadAllText(
@@ -20,7 +19,7 @@ namespace CodeTranslatorTest
             if (depth > DEPTH) return;
 
             var dirs = await rootDir.EnumerateDirectories();
-            foreach (var dirInfo in dirs)
+            foreach (GithubDirectoryInfo dirInfo in dirs)
             {
                 TestContext.Out.WriteLine(
                     "Absolute path: {0}; Name: {1}",
@@ -30,7 +29,7 @@ namespace CodeTranslatorTest
             }
 
             var files = await rootDir.EnumerateFiles();
-            foreach (var dirInfo in files)
+            foreach (GithubFileInfo dirInfo in files)
             {
                 TestContext.Out.WriteLine(
                     "Absolute path: {0}; Name: {1}",
@@ -56,13 +55,14 @@ namespace CodeTranslatorTest
         }
 
         [Test]
-        public void TestRecursiveEnumeration()
+        public void TestShortRecursiveEnumeration()
         {
             Assert.DoesNotThrowAsync(async () =>
             {
                 await EnumerateInfo(
                     new GithubDirectoryInfo(githubRepo, commitSHA, accessToken),
-                    true
+                    true,
+                    252
                 );
             });
         }

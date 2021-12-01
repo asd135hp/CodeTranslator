@@ -1,6 +1,6 @@
 using NUnit.Framework;
 using CodeTranslator.Utility;
-using CodeTranslator.Model.Tree;
+using CodeTranslator.Tree;
 
 namespace CodeTranslatorTest
 {

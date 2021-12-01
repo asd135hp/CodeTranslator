@@ -1,25 +1,17 @@
-﻿using System.Linq;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 
 namespace CodeTranslator.Tree
 {
-    public abstract class DirectoryTree : NTree
+    public abstract class DirectoryTree<IDirectoryInfo, IReadonlyFileInfo> : NTree
     {
-        public readonly string FullDirectoryName;
-        public readonly string FolderName;
+        protected IEnumerable<IReadonlyFileInfo> _files;
+        protected IDirectoryInfo _nodeInfo;
 
-        public DirectoryInfo CurrentDirectoryInfo => new DirectoryInfo(FullDirectoryName);
+        public IEnumerable<IReadonlyFileInfo> Files => _files;
+        public IDirectoryInfo Info => _nodeInfo;
 
-        public DirectoryTree(string rootDirectoryPath)
-        {
-            FullDirectoryName = rootDirectoryPath;
-            FolderName = new Regex("[\\/\\\\]").Split(rootDirectoryPath).Last();
-        }
-
-        protected DirectoryTree(string rootDirectoryPath, DirectoryTree parentDirectory)
-            : this(rootDirectoryPath)
+        protected DirectoryTree(DirectoryTree<IDirectoryInfo, IReadonlyFileInfo> parentDirectory)
         {
             Parent = parentDirectory;
         }

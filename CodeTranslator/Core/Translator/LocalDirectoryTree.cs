@@ -1,20 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 
 using CodeTranslator.Tree;
+using CodeTranslator.IO;
 
 namespace CodeTranslator.Core.Translator
 {
-    public sealed class LocalDirectoryTree : DirectoryTree
+    public sealed class LocalDirectoryTree : DirectoryTree<LocalDirectoryInfo, LocalFileInfo>
     {
         private const int MAX_DEPTH = 255;
-        private IEnumerable<FileInfo> _files;
 
-        public IEnumerable<FileInfo> Files => _files;
-
-        public LocalDirectoryTree(string rootDirectoryPath) : base(rootDirectoryPath)
-        {}
+        public LocalDirectoryTree(string rootDirectory) : this(rootDirectory, null) { }
 
         /// <summary>
         /// Hidden constructor for generating child directories objects in the tree recursively
@@ -24,26 +21,33 @@ namespace CodeTranslator.Core.Translator
         /// <param name="depth">
         /// Preventing the program from stepping too deep into sub-directories
         /// </param>
-        private LocalDirectoryTree(string rootDirectoryPath, DirectoryTree parentDirectory)
-            : base(rootDirectoryPath, parentDirectory)
-        {}
+        public LocalDirectoryTree(
+            string rootDirectory,
+            DirectoryTree<LocalDirectoryInfo, LocalFileInfo> parentDirectory)
+            : base(parentDirectory)
+        {
+            if (!Directory.Exists(rootDirectory))
+                throw new DirectoryNotFoundException(
+                    $"Could not find local directory: {rootDirectory}");
+
+            _nodeInfo = new LocalDirectoryInfo(rootDirectory);
+        }
 
         /// <summary>
         /// Populate directory tree on demand instead of recursively to save performance
         /// </summary>
-        public override Task PopulateAll()
-            => Task.Run(() => {
+        public override async Task PopulateAll()
+            => await Task.Run(async () => {
                 // no more than 255 sub-folders deep to be registered in the tree
                 if (Depth >= MAX_DEPTH) return;
 
-                var dirInfo = new DirectoryInfo(FullDirectoryName);
-
                 // add child directories to the enumerator recursively
-                foreach (var childDir in dirInfo.EnumerateDirectories())
+                foreach (LocalDirectoryInfo childDir in await _nodeInfo.EnumerateDirectories())
                     AddChildNode(new LocalDirectoryTree(childDir.FullName, this));
 
                 // add files to the enumerator recursively
-                _files = dirInfo.EnumerateFiles();
+                _files = (await _nodeInfo.EnumerateFiles())
+                    .Select(fileInfo => fileInfo as LocalFileInfo);
             });
     }
 }

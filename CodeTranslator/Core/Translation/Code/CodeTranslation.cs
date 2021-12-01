@@ -2,9 +2,7 @@
 using System.Threading.Tasks;
 
 using CodeTranslator.Core.Output;
-using CodeTranslator.Core.Output.Translated;
 using CodeTranslator.Model;
-using CodeTranslator.Utility.Model;
 using CodeTranslator.Utility.Progress;
 
 namespace CodeTranslator.Core.Translation.Code
@@ -23,7 +21,7 @@ namespace CodeTranslator.Core.Translation.Code
         public IOutput GetOutput(CodeFile codeFile)
         {
             Progress = new ProgressTracker();
-            var output = new TranslatedCodeFile(codeFile);
+            var output = new LanguageTranslatedOutput();
 
             ulong count = 0;
             foreach (string codeLine in codeFile.CodeLines)
@@ -33,7 +31,7 @@ namespace CodeTranslator.Core.Translation.Code
                     // somehow translate the line - TODO
                     var translatedCodeLine = "";
 
-                    output.TranslatedCodeLines.AddOrUpdate(
+                    output.SetTranslation(
                         count,
                         translatedCodeLine,
                         (lineNumber, oldCodeLine) => translatedCodeLine);

@@ -1,31 +1,32 @@
-﻿using System.IO;
+﻿using System;
 using System.Collections.Generic;
 
-using CodeTranslator.Tree;
+using CodeTranslator.IO;
 
 namespace CodeTranslator.Model
 {
     public class CodeFile
     {
-        internal FileInfo Info { get; private set; }
-        public DirectoryTree CurrentDirectory { get; internal set; }
+        public IReadonlyFileInfo Info { get; private set; }
         public IEnumerable<string> CodeLines { get; private set; }
         public int LineCount { get; private set; }
 
-        public CodeFile(FileInfo info)
+        public CodeFile(IReadonlyFileInfo info)
         {
             if (info == null)
-                throw new IOException("Could not get info of code file");
+                throw new ArgumentException("A file info must be passed to this constructor");
 
-            var readerStream = info.OpenText();
             var codeLines = new List<string>();
-
-            while (true)
+            
+            info.OpenText(readerStream =>
             {
-                var codeLine = readerStream.ReadLine();
-                if (codeLine == null) break;
-                codeLines.Add(codeLine);
-            }
+                while (true)
+                {
+                    var codeLine = readerStream.ReadLine();
+                    if (codeLine == null) break;
+                    codeLines.Add(codeLine);
+                }
+            });
 
             Info = info;
             CodeLines = codeLines;

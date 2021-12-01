@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using CodeTranslator.Github;
+using CodeTranslator.IO;
 using Octokit;
 
 namespace CodeTranslator.Model

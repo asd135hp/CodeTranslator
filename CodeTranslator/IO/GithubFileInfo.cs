@@ -4,9 +4,9 @@ using System.Linq;
 
 using CodeTranslator.Model;
 
-namespace CodeTranslator.Github
+namespace CodeTranslator.IO
 {
-    public sealed class GithubFileInfo : GithubTreeItem, IDisposable
+    public sealed class GithubFileInfo : GithubTreeItem, IReadonlyFileInfo, IDisposable
     {
         private const string STORING_FOLDER = "tmp";
 
@@ -14,6 +14,7 @@ namespace CodeTranslator.Github
         private readonly string _filePath;
 
         public GithubDirectoryInfo Directory { get; internal set; }
+        public FileInfo FileInfo => new FileInfo(_filePath);
 
         public override string Name => _fileName.Name;
         public override string Extension => _fileName.Extension;
@@ -95,9 +96,15 @@ namespace CodeTranslator.Github
             else _exists = false;
         }
 
-        public void ReadFileContents(Action<StreamReader> fileReader)
+        public void OpenText(Action<StreamReader> fileReader)
         {
             using var stream = File.OpenText(_filePath);
+            fileReader.Invoke(stream);
+        }
+
+        public void OpenRead(Action<FileStream> fileReader)
+        {
+            using var stream = File.OpenRead(_filePath);
             fileReader.Invoke(stream);
         }
 

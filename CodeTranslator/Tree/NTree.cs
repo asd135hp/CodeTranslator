@@ -108,4 +108,14 @@ namespace CodeTranslator.Tree
             _children.Clear();
         }
     }
+
+    public class NTree<T> : NTree
+    {
+        public T Data { get; private set; }
+
+        public NTree(T data) : base()
+        {
+            Data = data;
+        }
+    }
 }

@@ -1,4 +1,4 @@
-﻿namespace CodeTranslator.Utility.Model
+﻿namespace CodeTranslator.Model
 {
     public struct ProgressStatus
     {

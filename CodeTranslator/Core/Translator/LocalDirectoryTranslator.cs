@@ -1,15 +1,20 @@
-﻿using System.IO;
+﻿using CodeTranslator.IO;
+using CodeTranslator.Core.Translation;
+using CodeTranslator.Common;
 
 namespace CodeTranslator.Core.Translator
 {
-    public sealed class LocalDirectoryTranslator : GenericTranslator
+    public sealed class LocalDirectoryTranslator
+        : AbstractTranslator<LocalDirectoryInfo, LocalFileInfo>
     {
-        public LocalDirectoryTranslator(string rootDirectoryPath)
-        {
-            if (!Directory.Exists(rootDirectoryPath))
-                throw new DirectoryNotFoundException("Provided directory must be a local path in your machine");
+        public override TranslatorType Type => TranslatorType.LocalDirectory;
 
-            RootDirectory = new LocalDirectoryTree(rootDirectoryPath);
+        public LocalDirectoryTranslator(
+            LocalDirectoryTree directoryTree,
+            ITranslation translation)
+            : base(directoryTree, translation)
+        {
+
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CodeTranslator.Utility.Model;
+using CodeTranslator.Model;
 
 namespace CodeTranslator.Utility.Progress
 {
@@ -148,28 +148,7 @@ namespace CodeTranslator.Utility.Progress
                 observer.OnNext(_progressStatus);
             }
 
-            return new Unsubscriber(_observers, observer);
-        }
-
-        // until a new solution found
-        private class Unsubscriber : IDisposable
-        {
-            private readonly List<IObserver<ProgressStatus>> _observers;
-            private readonly IObserver<ProgressStatus> _observer;
-
-            public Unsubscriber(
-                List<IObserver<ProgressStatus>> observers,
-                IObserver<ProgressStatus> observer)
-            {
-                _observers = observers;
-                _observer = observer;
-            }
-
-            public void Dispose()
-            {
-                if (_observer != null && _observers.Contains(_observer))
-                    _observers.Remove(_observer);
-            }
+            return new ObserversUnsubscriber<ProgressStatus>(_observers, observer);
         }
 
         #endregion

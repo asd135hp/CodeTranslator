@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using CodeTranslator.Model;
 using Octokit;
 
-namespace CodeTranslator.Github
+namespace CodeTranslator.IO
 {
     public class GithubAPIInfo : ICloneable
     {

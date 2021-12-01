@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using CodeTranslator.Model;
 using Octokit;
 
-namespace CodeTranslator.Github
+namespace CodeTranslator.IO
 {
-    public sealed class GithubDirectoryInfo : GithubTreeItem
+    public sealed class GithubDirectoryInfo : GithubTreeItem, IDirectoryInfo
     {
         // could be a problem???
         private IEnumerable<TreeItem> _cache;
@@ -89,14 +89,14 @@ namespace CodeTranslator.Github
         /// Async-based method for enumerating directories by fetching data with Github API
         /// </summary>
         /// <returns></returns>
-        public async Task<GithubDirectoryInfo[]> GetDirectories()
+        public async Task<IDirectoryInfo[]> GetDirectories()
             => (await EnumerateDirectories()).ToArray();
 
         /// <summary>
         /// Async-based method for enumerating directories by fetching data with Github API
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<GithubDirectoryInfo>> EnumerateDirectories()
+        public async Task<IEnumerable<IDirectoryInfo>> EnumerateDirectories()
             => await FetchTreeItems(
                 TreeType.Tree,
                 apiInfo => new GithubDirectoryInfo(apiInfo)
@@ -108,15 +108,15 @@ namespace CodeTranslator.Github
         /// Async-based method for enumerating files by fetching data with Github API
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<GithubFileInfo>> GetFiles()
-            => (await EnumerateFiles()).ToArray();
+        public async Task<IReadonlyFileInfo[]> GetFiles(params string[] acceptedExtensions)
+            => (await EnumerateFiles(acceptedExtensions)).ToArray();
 
         /// <summary>
         /// Async-based method for enumerating files by fetching data with Github API
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<GithubFileInfo>> EnumerateFiles(
-            params string[] ignoredExtensions)
+        public async Task<IEnumerable<IReadonlyFileInfo>> EnumerateFiles(
+            params string[] acceptedExtensions)
             => await FetchTreeItems(
                 TreeType.Blob,
                 apiInfo => new GithubFileInfo(apiInfo)
@@ -126,7 +126,7 @@ namespace CodeTranslator.Github
                 treeItem =>
                 {
                     var extension = treeItem.Path.Split('.')[1];
-                    return ignoredExtensions.Contains(extension);
+                    return !acceptedExtensions.Contains(extension);
                 });
 
         /// <summary>

@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 using CodeTranslator.Model;
 using CodeTranslator.Core.Output;
-using CodeTranslator.Utility.Model;
 using CodeTranslator.Utility.Progress;
 
 namespace CodeTranslator.Core.Translation.UML

@@ -6,11 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Output\UML\Parser\" />
+    <Folder Include="Core\Output\UML\" />
+    <Folder Include="Model\Output\UMLParser\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Octokit" Version="0.50.0" />
+    <PackageReference Include="SharpCompress" Version="0.30.1" />
   </ItemGroup>
 
 </Project>
