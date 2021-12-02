@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-
 using CodeTranslator.Common;
 using CodeTranslator.Core.Translation;
+using CodeTranslator.Core.Tree;
 using CodeTranslator.IO;
 using CodeTranslator.Model;
 using SharpCompress.Common;
@@ -26,10 +26,10 @@ namespace CodeTranslator.Core.Translator
             using var stream = File.OpenRead(zipFilePath);
             _generatedDir = $@".\{new Guid(zipFilePath.ToByteArray())}";
             _progress = new ZipFileProgressStatus(stream.Length);
-            ReadZipfile(stream);
+            ReadZipFile(stream);
         }
 
-        private void ReadZipfile(Stream stream)
+        private void ReadZipFile(Stream stream)
             => Task.Run(() =>
             {
                 using var reader = ReaderFactory.Open(stream);

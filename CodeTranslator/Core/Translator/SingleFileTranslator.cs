@@ -1,5 +1,6 @@
 ﻿using CodeTranslator.IO;
 using CodeTranslator.Core.Translation;
+using CodeTranslator.Core.Tree;
 using CodeTranslator.Common;
 
 namespace CodeTranslator.Core.Translator

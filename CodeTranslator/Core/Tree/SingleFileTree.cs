@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-
 using CodeTranslator.IO;
-using CodeTranslator.Tree;
 
-namespace CodeTranslator.Core.Translator
+namespace CodeTranslator.Core.Tree
 {
     public sealed class SingleFileTree : DirectoryTree<LocalDirectoryInfo, LocalFileInfo>
     {

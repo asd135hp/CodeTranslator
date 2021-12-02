@@ -1,36 +1,34 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-
 using CodeTranslator.IO;
-using CodeTranslator.Tree;
 
-namespace CodeTranslator.Core.Translator
+namespace CodeTranslator.Core.Tree
 {
-    public sealed class GithubDirectoryTree : DirectoryTree<GithubDirectoryInfo, GithubFileInfo>
+    public sealed class GitHubDirectoryTree : DirectoryTree<GitHubDirectoryInfo, GitHubFileInfo>
     {
         private const int MAX_DEPTH = 255;
         
-        public GithubDirectoryTree(
+        public GitHubDirectoryTree(
             string repoUrl,
             string commitReference,
             string accessToken = "",
             string branch = "")
             : base(null)
         {
-            _nodeInfo = new GithubDirectoryInfo(repoUrl, commitReference, accessToken, branch);
+            _nodeInfo = new GitHubDirectoryInfo(repoUrl, commitReference, accessToken, branch);
         }
 
-        public GithubDirectoryTree(
+        public GitHubDirectoryTree(
             string subRepoUrl,
             string treeSha,
-            DirectoryTree<GithubDirectoryInfo, GithubFileInfo> parentDirectory)
+            DirectoryTree<GitHubDirectoryInfo, GitHubFileInfo> parentDirectory)
             : base(parentDirectory)
         {
-            var castedParent = parentDirectory as GithubDirectoryTree;
-            var parentApiInfo = castedParent._nodeInfo.APIInfo.Clone() as GithubAPIInfo;
-            _nodeInfo = new GithubDirectoryInfo(
+            var castedParent = parentDirectory as GitHubDirectoryTree;
+            var parentApiInfo = castedParent._nodeInfo.APIInfo.Clone() as GitHubAPIInfo;
+            _nodeInfo = new GitHubDirectoryInfo(
                 parentApiInfo
-                    .SetGithubUrl(subRepoUrl)
+                    .SetGitHubUrl(subRepoUrl)
                     .SetTreeReference(treeSha));
         }
 
@@ -40,8 +38,8 @@ namespace CodeTranslator.Core.Translator
             if (Depth >= MAX_DEPTH) return;
 
             // add child directories to the enumerator
-            foreach (GithubDirectoryInfo childDir in await _nodeInfo.EnumerateDirectories())
-                AddChildNode(new GithubDirectoryTree(
+            foreach (GitHubDirectoryInfo childDir in await _nodeInfo.EnumerateDirectories())
+                AddChildNode(new GitHubDirectoryTree(
                     childDir.AbsoluteUrl,
                     childDir.Sha,
                     this
@@ -49,7 +47,7 @@ namespace CodeTranslator.Core.Translator
 
             // add files to the enumerator
             _files = (await _nodeInfo.EnumerateFiles())
-                .Select(fileInfo => fileInfo as GithubFileInfo);
+                .Select(fileInfo => fileInfo as GitHubFileInfo);
         }
     }
 }

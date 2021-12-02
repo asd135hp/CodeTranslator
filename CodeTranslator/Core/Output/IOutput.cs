@@ -6,5 +6,6 @@ namespace CodeTranslator.Core.Output
     {
         string GetCurrent();
         bool MoveNext();
+        string SaveOutput();
     }
 }

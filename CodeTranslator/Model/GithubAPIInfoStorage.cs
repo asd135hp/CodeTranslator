@@ -2,7 +2,7 @@
 
 namespace CodeTranslator.Model
 {
-    internal class GithubAPIInfoStorage
+    internal class GitHubAPIInfoStorage
     {
         public Uri Url { get; set; }
         public string Branch { get; set; }

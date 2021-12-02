@@ -4,13 +4,13 @@ using Octokit;
 
 namespace CodeTranslator.Model
 {
-    public abstract class GithubTreeItem
+    public abstract class GitHubTreeItem
     {
         protected bool _exists;
         private readonly string _absolutePath;
-        private readonly GithubAPIInfo _apiInfo;
+        private readonly GitHubAPIInfo _apiInfo;
 
-        internal GithubAPIInfo APIInfo => _apiInfo;
+        internal GitHubAPIInfo APIInfo => _apiInfo;
 
         public bool Exists => _exists;
         public string Sha => _apiInfo.TreeSHA;
@@ -22,10 +22,10 @@ namespace CodeTranslator.Model
         public abstract string Extension { get; }
 
         /// <summary>
-        /// Public (and private for specific user) Github tree item reader
+        /// Public (and private for specific user) GitHub tree item reader
         /// </summary>
         /// <param name="apiInfo"></param>
-        protected GithubTreeItem(GithubAPIInfo apiInfo)
+        protected GitHubTreeItem(GitHubAPIInfo apiInfo)
         {
             _apiInfo = apiInfo;
             _exists = apiInfo.IsRepositoryExist;

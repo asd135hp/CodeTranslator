@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using CodeTranslator.Model;
 
-namespace CodeTranslator.Tree
+namespace CodeTranslator.Core.Tree
 {
     public abstract class DirectoryTree<IDirectoryInfo, IReadonlyFileInfo> : NTree
     {

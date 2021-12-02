@@ -9,8 +9,9 @@ namespace CodeTranslator.Model
         public static LanguageBuilder Builder => new LanguageBuilder();
 
         internal FileInfo Info { get; set; }
+        public bool IsReverseTranslation { get; internal set; }
         public string LanguageName { get; internal set; }
-        public readonly Dictionary<string, string> TranslatedKeywords;
+        public Dictionary<string, string> TranslatedKeywords { get; private set; }
 
         public Language()
         {

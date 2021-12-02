@@ -1,11 +1,9 @@
 ﻿using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
-
-using CodeTranslator.Tree;
 using CodeTranslator.IO;
 
-namespace CodeTranslator.Core.Translator
+namespace CodeTranslator.Core.Tree
 {
     public sealed class LocalDirectoryTree : DirectoryTree<LocalDirectoryInfo, LocalFileInfo>
     {

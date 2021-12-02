@@ -1,0 +1,14 @@
+﻿{
+  "name": "Vietnamese",
+  "translation": {
+    "int": "số nguyên",
+    "double": "thập phân",
+    "float": "thập phân nhẹ",
+    "string": "xâu",
+    "long": "số nguyên dài",
+    "ulong": "nguyên dương dài",
+    "short": "số nguyên ngắn",
+    "ushort": "nguyên dương ngắn",
+    "uint": "nguyên dương"
+  }
+}

@@ -7,7 +7,7 @@ namespace CodeTranslator.Core.Output
 {
     public class UMLOutput : IOutput
     {
-        public UMLOutput()
+        public UMLOutput(string fileName)
         {
         }
 
@@ -17,6 +17,10 @@ namespace CodeTranslator.Core.Output
         }
 
         public bool MoveNext()
+        {
+            throw new NotImplementedException();
+        }
+        public string SaveOutput()
         {
             throw new NotImplementedException();
         }

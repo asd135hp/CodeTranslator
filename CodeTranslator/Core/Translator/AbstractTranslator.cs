@@ -1,11 +1,11 @@
 ﻿using CodeTranslator.Common;
 using CodeTranslator.Core.Output;
 using CodeTranslator.Core.Translation;
+using CodeTranslator.Core.Tree;
 using CodeTranslator.IO;
 using CodeTranslator.Model;
-using CodeTranslator.Tree;
 
-namespace CodeTranslator.Core
+namespace CodeTranslator.Core.Translator
 {
     public abstract class AbstractTranslator<TDirectoryInfo, TFileInfo>
         : ITranslator<TDirectoryInfo, TFileInfo>

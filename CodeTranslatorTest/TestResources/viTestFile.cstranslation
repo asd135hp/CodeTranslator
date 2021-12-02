@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace CodeTranslatorTest.TestResources
+{
+    internal class TestFile
+    {
+        private nguyên a = 10;
+        private xâu b = "hey, isn't int a nice primitive type?";
+        private nguyên dương dài c = 10UL;
+        private thập phân d = 10.0;
+    }
+}

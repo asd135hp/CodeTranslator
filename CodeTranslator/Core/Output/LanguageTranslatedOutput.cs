@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
+
 using CodeTranslator.Model.Output;
+using Microsoft.Extensions.Logging;
 
 namespace CodeTranslator.Core.Output
 {
@@ -7,9 +10,11 @@ namespace CodeTranslator.Core.Output
     {
         private readonly TranslatedCodeFile _tledFile;
 
-        public LanguageTranslatedOutput()
+        internal ILogger Logger { get; set; }
+
+        public LanguageTranslatedOutput(string fileName, bool isReverseTranslation)
         {
-            _tledFile = new TranslatedCodeFile();
+            _tledFile = new TranslatedCodeFile(fileName, isReverseTranslation);
         }
 
         /// <summary>
@@ -18,14 +23,17 @@ namespace CodeTranslator.Core.Output
         /// <param name="index"></param>
         /// <param name="translatedLine"></param>
         /// <param name="updateValueFactory"></param>
-        internal void SetTranslation(
+        internal void StoreTranslation(
             ulong index,
             string translatedLine,
             Func<ulong, string, string> updateValueFactory)
-            => _tledFile.TranslatedCodeLines.AddOrUpdate(
-                index,
-                translatedLine,
-                updateValueFactory);
+        {
+            if(_tledFile.IsTranslatedFromCachedFile)
+                _tledFile.TranslatedCodeLines.AddOrUpdate(
+                    index,
+                    translatedLine,
+                    updateValueFactory);
+        }
 
         public string GetCurrent()
             => _tledFile.TranslatedCodeLines[_tledFile.CurrentLineIndex++];
@@ -37,6 +45,24 @@ namespace CodeTranslator.Core.Output
 
             _tledFile.CurrentLineIndex++;
             return true;
+        }
+
+        public string SaveOutput()
+        {
+            var index = 0UL;
+            var dict = _tledFile.TranslatedCodeLines;
+            File.WriteAllText(_tledFile.FilePath, "");
+
+            using (var file = File.AppendText(_tledFile.FilePath))
+                while (dict.ContainsKey(index))
+                {
+                    file.WriteLine(_tledFile.TranslatedCodeLines[index++]);
+                }
+
+            Logger?.LogInformation(
+                $"Successfully saved translation to {_tledFile.FilePath} with {index} lines");
+
+            return _tledFile.FilePath;
         }
     }
 }

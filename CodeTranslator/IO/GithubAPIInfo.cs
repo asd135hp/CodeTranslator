@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using CodeTranslator.Model;
+using Microsoft.Extensions.Logging;
 using Octokit;
 
 namespace CodeTranslator.IO
 {
-    public class GithubAPIInfo : ICloneable
+    public class GitHubAPIInfo : ICloneable
     {
         private const long TICKS = 10_000L;
         private const string DEFAULT_MAIN_BRANCH = "master";
@@ -15,7 +16,7 @@ namespace CodeTranslator.IO
 
         private static GitHubClient _client = null;
 
-        private GithubAPIInfoStorage _storage;
+        private GitHubAPIInfoStorage _storage;
 
         public Uri Url => _storage.Url;
         public string Branch => _storage.Branch;
@@ -26,9 +27,11 @@ namespace CodeTranslator.IO
         public bool IsRepositoryExist
             => this.AwaitTask(_client.Repository.Get(Owner, RepositoryName)) != null;
 
-        public GithubAPIInfo()
+        public ILogger Logger { get; set; }
+
+        public GitHubAPIInfo()
         {
-            _storage = new GithubAPIInfoStorage()
+            _storage = new GitHubAPIInfoStorage()
             {
                 Owner = string.Empty,
                 RepositoryName = string.Empty,
@@ -52,14 +55,14 @@ namespace CodeTranslator.IO
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public GithubAPIInfo SetGithubUrl(string url) => SetGithubUrl(new Uri(url));
+        public GitHubAPIInfo SetGitHubUrl(string url) => SetGitHubUrl(new Uri(url));
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public GithubAPIInfo SetGithubUrl(Uri url)
+        public GitHubAPIInfo SetGitHubUrl(Uri url)
         {
             // normal url must contains at least 3 segments
             var segments = url.Segments;
@@ -68,7 +71,7 @@ namespace CodeTranslator.IO
                 _storage.Owner = segments[1].Trim('/', '\\').Trim();
                 _storage.RepositoryName = segments[2].Trim('/', '\\').Trim();
             }
-
+            
             _storage.Url = url;
 
             return this;
@@ -79,7 +82,7 @@ namespace CodeTranslator.IO
         /// </summary>
         /// <param name="branch"></param>
         /// <returns></returns>
-        public GithubAPIInfo SetBranch(string branch)
+        public GitHubAPIInfo SetBranch(string branch)
         {
             _storage.Branch = _storage.Branch.Length != 0 ? branch : DEFAULT_MAIN_BRANCH;
             return this;
@@ -90,7 +93,7 @@ namespace CodeTranslator.IO
         /// </summary>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public GithubAPIInfo SetAccessToken(string accessToken)
+        public GitHubAPIInfo SetAccessToken(string accessToken)
         {
             _client.Credentials = new Credentials(accessToken);
             return this;
@@ -102,7 +105,7 @@ namespace CodeTranslator.IO
         /// <param name="commitReference"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public GithubAPIInfo SetCommit(string commitReference)
+        public GitHubAPIInfo SetCommit(string commitReference)
         {
             // get commit if commit sha is different from what is stored
             if (commitReference != null
@@ -111,7 +114,7 @@ namespace CodeTranslator.IO
             {
                 var commit = this.AwaitTask(_client.Git.Commit.Get(Owner, RepositoryName, commitReference));
                 if (commit == null)
-                    throw new ArgumentException($"Could not find Github commit ref: {commitReference}");
+                    throw new ArgumentException($"Could not find GitHub commit ref: {commitReference}");
                 SetTreeReference(commit.Tree.Sha);
                 _storage.CommitSHA = commit.Tree.Sha;
             }
@@ -123,7 +126,7 @@ namespace CodeTranslator.IO
         /// </summary>
         /// <param name="treeSha"></param>
         /// <returns></returns>
-        public GithubAPIInfo SetTreeReference(string treeSha)
+        public GitHubAPIInfo SetTreeReference(string treeSha)
         {
             _storage.TreeSHA = treeSha;
             return this;
@@ -131,7 +134,7 @@ namespace CodeTranslator.IO
 
         /// <summary>
         /// <para>
-        /// Timeout duration for requesting from Github API in milliseconds.
+        /// Timeout duration for requesting from GitHub API in milliseconds.
         /// Default is 5000ms or 5 seconds
         /// </para>
         /// <para>
@@ -140,7 +143,7 @@ namespace CodeTranslator.IO
         /// </para>
         /// </summary>
         /// <param name="timeInMilliseconds"></param>
-        public GithubAPIInfo SetTimeout(int timeInMilliseconds)
+        public GitHubAPIInfo SetTimeout(int timeInMilliseconds)
         {
             _storage.Timeout = timeInMilliseconds;
             _client?.SetRequestTimeout(new TimeSpan(timeInMilliseconds * TICKS));
@@ -148,9 +151,9 @@ namespace CodeTranslator.IO
         }
 
         public object Clone()
-            => new GithubAPIInfo
+            => new GitHubAPIInfo
             {
-                _storage = new GithubAPIInfoStorage
+                _storage = new GitHubAPIInfoStorage
                 {
                     Owner = Owner,
                     RepositoryName = RepositoryName,
@@ -158,13 +161,13 @@ namespace CodeTranslator.IO
                     TreeSHA = TreeSHA,
                     Url = new Uri(Url.AbsoluteUri),
                     CommitSHA = _storage.CommitSHA
-                }
+                },
+                Logger = Logger
             };
 
         #endregion
 
-
-        #region Read operations for both GithubDirectoryInfo and GithubFileInfo
+        #region Read operations for both GitHubDirectoryInfo and GitHubFileInfo
 
         /// <summary>
         /// 

@@ -6,10 +6,11 @@ namespace CodeTranslator.Core.Translation.Code
 {
     public class LanguageBuilder
     {
-        private string _directory = "";
+        private string _directory = ".\\translation";
         internal readonly Language _language = new Language()
         {
-            Info = null
+            Info = null,
+            IsReverseTranslation = false
         };
 
         /// <summary>
@@ -22,8 +23,9 @@ namespace CodeTranslator.Core.Translation.Code
         /// <exception cref="DirectoryNotFoundException"></exception>
         public LanguageBuilder SetDirectory(string directory)
         {
-            if (!Directory.Exists(directory))
-                throw new DirectoryNotFoundException($"New language directory ({directory}) must be a local directory");
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                throw new DirectoryNotFoundException(
+                    $"New language directory ({directory}) must be a local directory");
 
             _directory = directory;
             return this;
@@ -35,22 +37,33 @@ namespace CodeTranslator.Core.Translation.Code
         /// <param name="translationFileName">Only name and extension (.json)</param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException"></exception>
-        public LanguageBuilder SetLanguageFile(string translationFileName)
+        public LanguageBuilder SetLanguageFileName(string translationFileName)
         {
-            string fileName = _directory.Length == 0 ?
-                $"translation/{translationFileName}" :
-                $"{_directory}/{translationFileName}";
+            string filePath = File.Exists(translationFileName) ?
+                translationFileName : $@"{_directory}\{translationFileName}";
 
-            if (!File.Exists(fileName))
-                throw new FileNotFoundException($"Could not find local language file: {fileName}");
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException($"Could not find local language file: {filePath}");
 
-            _language.Info = new FileInfo(fileName);
+            _language.Info = new FileInfo(filePath);
 
             return this;
         }
 
         /// <summary>
-        /// 
+        /// Enable reverse translation, making it possible to write code in another language
+        /// and translate it to the corresponding code file
+        /// </summary>
+        /// <param name="enableReverseTranslation"></param>
+        /// <returns></returns>
+        public LanguageBuilder SetReverseTranslation(bool enableReverseTranslation)
+        {
+            _language.IsReverseTranslation = enableReverseTranslation;
+            return this;
+        }
+
+        /// <summary>
+        /// Parse JSON into CodeTranslator.Model.Language class object
         /// </summary>
         /// <param name="jsonDocument"></param>
         private void ParseLanguageFile(JsonDocument jsonDocument)
@@ -73,8 +86,14 @@ namespace CodeTranslator.Core.Translation.Code
             {
                 var rawKeyword = translatedKeywords.Name;
                 var translatedValue = translatedKeywords.Value;
-                if(translatedValue.ValueKind == JsonValueKind.String)
-                    _language.TranslatedKeywords[rawKeyword] = translatedValue.GetString();
+                if (translatedValue.ValueKind == JsonValueKind.String)
+                {
+                    var translatedKeyword = translatedValue.GetString();
+                    if (_language.IsReverseTranslation)
+                        _language.TranslatedKeywords[translatedKeyword] = rawKeyword;
+                    else
+                        _language.TranslatedKeywords[rawKeyword] = translatedKeyword;
+                }
             }
         }
 

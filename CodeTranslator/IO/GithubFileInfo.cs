@@ -6,83 +6,84 @@ using CodeTranslator.Model;
 
 namespace CodeTranslator.IO
 {
-    public sealed class GithubFileInfo : GithubTreeItem, IReadonlyFileInfo, IDisposable
+    public sealed class GitHubFileInfo : GitHubTreeItem, IReadonlyFileInfo, IDisposable
     {
         private const string STORING_FOLDER = "tmp";
 
         private readonly FileName _fileName;
         private readonly string _filePath;
 
-        public GithubDirectoryInfo Directory { get; internal set; }
+        public GitHubDirectoryInfo Directory { get; internal set; }
         public FileInfo FileInfo => new FileInfo(_filePath);
 
         public override string Name => _fileName.Name;
         public override string Extension => _fileName.Extension;
+        public string FullName => _fileName.FullName;
 
         /// <summary>
-        /// Public (and private for specific user) Github file reader
+        /// Public (and private for specific user) GitHub file reader
         /// </summary>
-        /// <param name="githubUrl"></param>
+        /// <param name="GitHubUrl"></param>
         /// <param name="commitReference"></param>
         /// <param name="accessToken"></param>
-        public GithubFileInfo(
-            string githubUrl,
+        public GitHubFileInfo(
+            string GitHubUrl,
             string commitReference,
             string accessToken)
-            : this(new Uri(githubUrl), commitReference, accessToken, "") { }
+            : this(new Uri(GitHubUrl), commitReference, accessToken, "") { }
 
         /// <summary>
-        /// Public (and private for specific user) Github file reader
+        /// Public (and private for specific user) GitHub file reader
         /// </summary>
-        /// <param name="githubUrl"></param>
+        /// <param name="GitHubUrl"></param>
         /// <param name="commitReference"></param>
         /// <param name="accessToken"></param>
-        public GithubFileInfo(
-            Uri githubUrl,
+        public GitHubFileInfo(
+            Uri GitHubUrl,
             string commitReference,
             string accessToken)
-            : this(githubUrl, commitReference, accessToken, "") { }
+            : this(GitHubUrl, commitReference, accessToken, "") { }
 
         /// <summary>
-        /// Public (and private for specific user) Github file reader
+        /// Public (and private for specific user) GitHub file reader
         /// </summary>
-        /// <param name="githubUrl"></param>
+        /// <param name="GitHubUrl"></param>
         /// <param name="commitReference"></param>
         /// <param name="accessToken"></param>
         /// <param name="branch"></param>
-        public GithubFileInfo(
-            string githubUrl,
+        public GitHubFileInfo(
+            string GitHubUrl,
             string commitReference,
             string accessToken,
             string branch)
-            : this(new Uri(githubUrl), commitReference, accessToken, branch) { }
+            : this(new Uri(GitHubUrl), commitReference, accessToken, branch) { }
 
         /// <summary>
-        /// Public (and private for specific user) Github file reader
+        /// Public (and private for specific user) GitHub file reader
         /// </summary>
-        /// <param name="githubUrl"></param>
+        /// <param name="GitHubUrl"></param>
         /// <param name="branch"></param>
         /// <param name="accessToken"></param>
         /// <param name="branch"></param>
-        public GithubFileInfo(
-            Uri githubUrl,
+        public GitHubFileInfo(
+            Uri GitHubUrl,
             string commitReference,
             string accessToken,
             string branch)
-            : this(new GithubAPIInfo()
+            : this(new GitHubAPIInfo()
                   .SetAccessToken(accessToken)
-                  .SetGithubUrl(githubUrl)
+                  .SetGitHubUrl(GitHubUrl)
                   .SetCommit(commitReference)
                   .SetBranch(branch)) { }
 
-        public GithubFileInfo(GithubAPIInfo apiInfo) : base(apiInfo)
+        public GitHubFileInfo(GitHubAPIInfo apiInfo) : base(apiInfo)
         {
             var segments = apiInfo.Url.Segments;
             // set up name and extension of this tree item if possible
             if (Exists)
             {
                 if (segments.Length > 5)
-                    _fileName = new FileName(segments.Last());
+                    _fileName = new FileName(apiInfo.Url.LocalPath);
 
                 // start fetching content of the file
                 _filePath = $"{STORING_FOLDER}\\{apiInfo.TreeSHA}.tmp";
