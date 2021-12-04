@@ -1,6 +1,6 @@
 # CodeTranslator
 ## Purpose
-This project aims to deliver the code to be readable by everyone in the world.
+This ambitious project aims to deliver the code to be readable by everyone in the world.
 ## Background
 English is not my mother tounge so I find it hard grasping the intention of the code as a child.
 The mandatory coding books that we learnt in our school was honestly not in a good quality as they expected us

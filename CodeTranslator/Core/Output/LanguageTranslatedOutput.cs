@@ -8,6 +8,7 @@ namespace CodeTranslator.Core.Output
 {
     public class LanguageTranslatedOutput : IOutput
     {
+        private static readonly object lockObj = new object { };
         private readonly TranslatedCodeFile _tledFile;
 
         internal ILogger Logger { get; set; }
@@ -22,17 +23,10 @@ namespace CodeTranslator.Core.Output
         /// </summary>
         /// <param name="index"></param>
         /// <param name="translatedLine"></param>
-        /// <param name="updateValueFactory"></param>
-        internal void StoreTranslation(
-            ulong index,
-            string translatedLine,
-            Func<ulong, string, string> updateValueFactory)
+        internal void StoreTranslation(long index, string translatedLine)
         {
             if(_tledFile.IsTranslatedFromCachedFile)
-                _tledFile.TranslatedCodeLines.AddOrUpdate(
-                    index,
-                    translatedLine,
-                    updateValueFactory);
+                _tledFile.TranslatedCodeLines[index] = translatedLine;
         }
 
         public string GetCurrent()
@@ -49,15 +43,19 @@ namespace CodeTranslator.Core.Output
 
         public string SaveOutput()
         {
-            var index = 0UL;
+            var index = 0L;
             var dict = _tledFile.TranslatedCodeLines;
-            File.WriteAllText(_tledFile.FilePath, "");
 
-            using (var file = File.AppendText(_tledFile.FilePath))
+            lock (lockObj)
+            {
+                File.WriteAllText(_tledFile.FilePath, "");
+
+                using var file = File.AppendText(_tledFile.FilePath);
                 while (dict.ContainsKey(index))
                 {
                     file.WriteLine(_tledFile.TranslatedCodeLines[index++]);
                 }
+            }
 
             Logger?.LogInformation(
                 $"Successfully saved translation to {_tledFile.FilePath} with {index} lines");

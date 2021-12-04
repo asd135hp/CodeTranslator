@@ -1,10 +1,12 @@
 ﻿using System.IO;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace CodeTranslator.Model.Output
 {
     internal sealed class TranslatedCodeFile
     {
+        private const string DIRECTORY = @".\translation";
+
         /// <summary>
         /// Indicates that the file should not be translated anymore if true
         /// </summary>
@@ -18,37 +20,35 @@ namespace CodeTranslator.Model.Output
         /// <summary>
         /// Cached position for future code line reading
         /// </summary>
-        public ulong CurrentLineIndex { get; set; }
+        public long CurrentLineIndex { get; set; }
 
         /// <summary>
         /// Dictionary for caching translated words
         /// </summary>
-        public ConcurrentDictionary<ulong, string> TranslatedCodeLines { get; private set; }
+        public Dictionary<long, string> TranslatedCodeLines { get; private set; }
 
         public TranslatedCodeFile(string fileName, bool isReverseTranslation)
         {
             FilePath = !isReverseTranslation ?
-                $@".\translation\{fileName}translation" :
-                $@".\translation\{fileName.TrimEnd("translation")}";
+                $@"{DIRECTORY}\{fileName}translation" :
+                $@"{DIRECTORY}\{fileName.TrimEnd("translation")}";
             CurrentLineIndex = 0;
-            TranslatedCodeLines = new ConcurrentDictionary<ulong, string>();
+            TranslatedCodeLines = new Dictionary<long, string>();
 
             // create new directory for storing translation file
-            if (!Directory.Exists(@".\translation"))
-                Directory.CreateDirectory(@".\translation");
+            if (!Directory.Exists(DIRECTORY))
+                Directory.CreateDirectory(DIRECTORY);
 
             // if the file has already existed, cache the file and deny future changes
             // to this object
-            if (IsTranslatedFromCachedFile = File.Exists(FilePath)){
+            if (IsTranslatedFromCachedFile = File.Exists(FilePath))
+            {
                 using var stream = File.OpenText(FilePath);
                 string line;
-                ulong index = 0UL;
+                long index = 0L;
                 while ((line = stream.ReadLine()) != null)
                 {
-                    TranslatedCodeLines.AddOrUpdate(
-                        index++,
-                        line,
-                        (_0, _1) => line);
+                    TranslatedCodeLines[index++] = line;
                 }
             }
         }

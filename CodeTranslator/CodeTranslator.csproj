@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Folder Include="Core\Output\UML\" />
-    <Folder Include="Model\Output\UMLParser\" />
   </ItemGroup>
 
   <ItemGroup>

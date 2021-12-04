@@ -6,8 +6,6 @@ namespace CodeTranslator.Model
 {
     public class Language
     {
-        public static LanguageBuilder Builder => new LanguageBuilder();
-
         internal FileInfo Info { get; set; }
         public bool IsReverseTranslation { get; internal set; }
         public string LanguageName { get; internal set; }

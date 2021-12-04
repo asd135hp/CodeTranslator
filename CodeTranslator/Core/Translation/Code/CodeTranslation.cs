@@ -1,62 +1,52 @@
 ﻿using System;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.Linq;
 
 using CodeTranslator.Core.Output;
 using CodeTranslator.Model;
-using CodeTranslator.Utility.Progress;
+using CodeTranslator.Core.Parser;
 
 namespace CodeTranslator.Core.Translation.Code
 {
-    public class CodeTranslation : ITranslation
+    public sealed class CodeTranslation : ITranslation
     {
-        private ProgressTracker _tracker;
-        private static readonly Regex _keywordPattern
-            = new Regex(@"(?<=[(\s])(?:[a-zA-Z]+)(?=[,\s])");
+        public Model.Translation Translation { get; set; }
 
-        public Language Language { get; set; }
+        public event EventHandler<TranslationProgressEventArgs> TranslationTracker;
 
-        public ProgressTracker Progress => _tracker;
-
-        public CodeTranslation() : base()
-        {
-            _tracker = null;
-        }
+        public CodeTranslation() { }
 
         public IOutput GetOutput(CodeFile codeFile)
         {
-            _tracker = new ProgressTracker();
             var output = new LanguageTranslatedOutput(
                 codeFile.Info.Name,
-                Language.IsReverseTranslation);
+                Translation.Language.IsReverseTranslation);
+            var parser = new CodeParser()
+            {
+                Rules = Translation?.Rules,
+                Settings = Translation?.Settings
+            };
 
-            ulong count = 0;
+            long count = 0L;
+            var args = new TranslationProgressEventArgs(0, codeFile.CodeLines.Count());
             foreach (string codeLine in codeFile.CodeLines)
             {
-                Progress.AddTask(Task.Run(() =>
-                {
-                    // somehow translate the line - TODO
-                    var translatedCodeLine = Translate(codeLine);
-                    output.StoreTranslation(
-                        count,
-                        translatedCodeLine,
-                        (lineNumber, oldCodeLine) => translatedCodeLine);
-                }));
-
-                count++;
+                // somehow translate the line - TODO
+                var translatedCodeLine = Translate(codeLine);
+                output.StoreTranslation(count, translatedCodeLine);
+                args.Update(count++);
+                TranslationTracker?.Invoke(this, args);
             }
 
             return output;
         }
 
-        public IObservable<ProgressStatus> GetObservableProgressTracker() => Progress;
-
         private string Translate(string input)
             => _keywordPattern.Replace(input, match =>
             {
                 string value = match.Value;
-                return Language.TranslatedKeywords.ContainsKey(value) ?
-                    Language.TranslatedKeywords[value] : value;
+                var lang = Translation.Language;
+                return lang.TranslatedKeywords.ContainsKey(value) ?
+                    lang.TranslatedKeywords[value] : value;
             });
     }
 }

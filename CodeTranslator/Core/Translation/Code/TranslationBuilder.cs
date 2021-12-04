@@ -1,17 +1,21 @@
 ﻿using System.IO;
+using System.Collections.Generic;
 using System.Text.Json;
 using CodeTranslator.Model;
+using CodeTranslator.Rules;
 
 namespace CodeTranslator.Core.Translation.Code
 {
-    public class LanguageBuilder
+    public class TranslationBuilder
     {
         private string _directory = ".\\translation";
-        internal readonly Language _language = new Language()
+        private readonly Language _language = new Language()
         {
             Info = null,
             IsReverseTranslation = false
         };
+        private readonly List<IRule> _rules = new List<IRule>();
+
 
         /// <summary>
         /// Set absolute directory for finding language file.
@@ -21,7 +25,7 @@ namespace CodeTranslator.Core.Translation.Code
         /// <param name="path"></param>
         /// <returns></returns>
         /// <exception cref="DirectoryNotFoundException"></exception>
-        public LanguageBuilder SetDirectory(string directory)
+        public TranslationBuilder SetDirectory(string directory)
         {
             if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 throw new DirectoryNotFoundException(
@@ -37,7 +41,7 @@ namespace CodeTranslator.Core.Translation.Code
         /// <param name="translationFileName">Only name and extension (.json)</param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException"></exception>
-        public LanguageBuilder SetLanguageFileName(string translationFileName)
+        public TranslationBuilder SetTranslationFileName(string translationFileName)
         {
             string filePath = File.Exists(translationFileName) ?
                 translationFileName : $@"{_directory}\{translationFileName}";
@@ -56,7 +60,7 @@ namespace CodeTranslator.Core.Translation.Code
         /// </summary>
         /// <param name="enableReverseTranslation"></param>
         /// <returns></returns>
-        public LanguageBuilder SetReverseTranslation(bool enableReverseTranslation)
+        public TranslationBuilder SetReverseTranslation(bool enableReverseTranslation)
         {
             _language.IsReverseTranslation = enableReverseTranslation;
             return this;
@@ -66,7 +70,7 @@ namespace CodeTranslator.Core.Translation.Code
         /// Parse JSON into CodeTranslator.Model.Language class object
         /// </summary>
         /// <param name="jsonDocument"></param>
-        private void ParseLanguageFile(JsonDocument jsonDocument)
+        private void ParseLanguage(JsonDocument jsonDocument)
         {
             var jsonRoot = jsonDocument.RootElement;
             
@@ -98,10 +102,35 @@ namespace CodeTranslator.Core.Translation.Code
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jsonDocument"></param>
+        private IEnumerable<IRule> GetRuleSets(JsonDocument jsonDocument)
+        {
+            var result = new List<IRule>();
+            var jsonRoot = jsonDocument.RootElement;
+
+            return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jsonDocument"></param>
+        private CodeTranslationSettings GetSettings(JsonDocument jsonDocument)
+        {
+            var settings = new CodeTranslationSettings();
+            var jsonRoot = jsonDocument.RootElement;
+
+
+            return settings;
+        }
+
+        /// <summary>
         /// Obligatory method for Builder pattern
         /// </summary>
         /// <returns></returns>
-        public Language Build()
+        public Model.Translation Build()
         {
             var stream = File.OpenRead(_language.Info.FullName);
             var jd = JsonDocument.Parse(stream, new JsonDocumentOptions()
@@ -109,9 +138,15 @@ namespace CodeTranslator.Core.Translation.Code
                 AllowTrailingCommas = true,
                 CommentHandling = JsonCommentHandling.Skip
             });
-            ParseLanguageFile(jd);
 
-            return _language;
+            ParseLanguage(jd);
+
+            return new Model.Translation()
+            {
+                Language = _language,
+                Rules = GetRuleSets(jd),
+                Settings = GetSettings(jd)
+            };
         }
     }
 }

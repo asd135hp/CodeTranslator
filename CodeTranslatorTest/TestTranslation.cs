@@ -61,16 +61,13 @@ namespace CodeTranslatorTest
         [Test]
         public void TestCodeTranslation()
         {
+            /// three invisible bytes are padded at the beginning of the file
+            /// COdeTranslatorTest/TestResources/viTestFile.cstranslation,
+            /// which is a bit concerning
             Setup();
             var outputFileName = translation.GetOutput(file).SaveOutput();
-            var progress = translation.GetObservableProgressTracker() as ProgressTracker;
-            while(!progress?.IsFinished ?? false)
-            {
-                Thread.Sleep(1000);
-            }
-
-            using var stream = File.OpenRead(outputFileName);
-            using var otherStream = File.OpenRead(TranslationFile);
+            using var stream = File.OpenText(outputFileName);
+            using var otherStream = File.OpenText(TranslationFile);
             Console.WriteLine("Similarity rating: {0}%", stream.SimilarityRating(otherStream) * 100);
             Assert.AreEqual(true, stream.Compare(otherStream));
         }
@@ -78,16 +75,13 @@ namespace CodeTranslatorTest
         [Test]
         public void TestReverseCodeTranslation()
         {
+            /// three invisible bytes are padded at the beginning of the file
+            /// COdeTranslatorTest/TestResources/TestFile.cs,
+            /// which is a bit concerning
             Setup(true, TranslationFile);
             var outputFileName = translation.GetOutput(file).SaveOutput();
-            var progress = translation.GetObservableProgressTracker() as ProgressTracker;
-            while (!progress?.IsFinished ?? false)
-            {
-                Thread.Sleep(1000);
-            }
-
-            using var stream = File.OpenRead(outputFileName);
-            using var otherStream = File.OpenRead(TestFile);
+            using var stream = File.OpenText(outputFileName);
+            using var otherStream = File.OpenText(TestFile);
             Console.WriteLine("Similarity rating: {0}%", stream.SimilarityRating(otherStream) * 100);
             Assert.AreEqual(true, stream.Compare(otherStream));
         }

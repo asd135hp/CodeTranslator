@@ -10,5 +10,14 @@
     "short": "số nguyên ngắn",
     "ushort": "nguyên dương ngắn",
     "uint": "nguyên dương"
+  },
+  "components": {
+
+  },
+  "rules": {
+    // set to false if the language is non-OOP
+    "class_allowed": "true",
+    // set to false if the language is non-OOP
+    "struct_allowed": "true"
   }
 }

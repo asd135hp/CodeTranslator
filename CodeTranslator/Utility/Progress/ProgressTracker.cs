@@ -8,8 +8,8 @@ namespace CodeTranslator.Utility.Progress
 {
     public class ProgressTracker: AsyncTokenWrapper, IObservable<ProgressStatus>
     {
+        // event listener
         private readonly Task _counter = null;
-        private readonly List<Action<ProgressTracker>> _externalActions;
         private readonly List<IObserver<ProgressStatus>> _observers;
 
         private ProgressStatus _progressStatus;
@@ -19,13 +19,14 @@ namespace CodeTranslator.Utility.Progress
 
         public int TrackingInterval { get; set; }
 
+        public event EventHandler<ProgressStatus> ProgressStatusChanged;
+
         public ProgressTracker(int trackingInterval = 1000) : base()
         {
             TrackingInterval = trackingInterval;
             IsFinished = false;
 
             _progressStatus = new ProgressStatus();
-            _externalActions = new List<Action<ProgressTracker>>();
             _currentTasks = new List<Task>();
             _observers = new List<IObserver<ProgressStatus>>();
 
@@ -45,11 +46,11 @@ namespace CodeTranslator.Utility.Progress
                         // count completed tasks first
                         CountCompletedTasks();
 
-                        // then start all registered actions
-                        foreach (var action in _externalActions) action.Invoke(this);
-
                         // inform all observers about the change
                         foreach (var observer in _observers) observer.OnNext(_progressStatus);
+
+                        // send out information for events
+                        ProgressStatusChanged?.Invoke(this, _progressStatus);
 
                         continue;
                     }
@@ -58,12 +59,20 @@ namespace CodeTranslator.Utility.Progress
                     foreach (var observer in _observers)
                         observer.OnError(new Exception("Progress observation ended suddenly"));
 
+                    _progressStatus.IsCancelled = true;
+                    ProgressStatusChanged?.Invoke(this, _progressStatus);
+
                     break;
                 }
 
                 if (!_token.IsCancellationRequested)
+                {
                     foreach (var observer in _observers)
                         observer.OnCompleted();
+
+                    _progressStatus.IsCompleted = true;
+                    ProgressStatusChanged?.Invoke(this, _progressStatus);
+                }
 
                 CleanUp();
             }, _token);
@@ -91,18 +100,6 @@ namespace CodeTranslator.Utility.Progress
         }
 
         /// <summary>
-        /// <para>Add new action to the list of registered actions for progress counter task.</para>
-        /// <para>WARNING: The actions pushed to the list will all be simultaneously called
-        /// in an interval of 1 second until the progress counter task finished.</para>
-        /// </summary>
-        /// <param name="action"></param>
-        public void AddCustomActionToCounter(Action<ProgressTracker> action)
-        {
-            if (!_externalActions.Contains(action))
-                _externalActions.Add(action);
-        }
-
-        /// <summary>
         /// Provide a thread-safe operation for counting the number of finished tasks
         /// </summary>
         private void CountCompletedTasks()
@@ -123,7 +120,6 @@ namespace CodeTranslator.Utility.Progress
                 CancelAllTasks();
                 _counter?.Dispose();
                 _currentTasks.Clear();
-                _externalActions.Clear();
                 _observers.Clear();
             }
             catch (Exception e)

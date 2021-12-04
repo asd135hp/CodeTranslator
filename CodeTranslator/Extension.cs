@@ -22,6 +22,12 @@ namespace CodeTranslator
             task.Wait();
             return task.Result;
         }
+
+        public static T Await<T>(this Task<T> task)
+        {
+            task.Wait();
+            return task.Result;
+        }
         #endregion
 
         #endregion
@@ -100,27 +106,40 @@ namespace CodeTranslator
         #region IO
 
         #region File
-        public static bool Compare(this Stream stream, Stream otherStream)
-            => stream.SimilarityRating(otherStream) == 1.0;
+        public static bool Compare(this StreamReader reader, StreamReader otherReader)
+            => Math.Floor(reader.SimilarityRating(otherReader)) == 1.0;
 
-        public static double SimilarityRating(this Stream stream, Stream otherStream)
+        public static double SimilarityRating(this StreamReader reader, StreamReader otherReader)
         {
-            long similarityCount = 0L;
-            int currentByte, otherByte;
+            long dist = reader.NaiveDiffComparision(otherReader);
 
-            while(true)
+            reader.BaseStream.Position = otherReader.BaseStream.Position = 0;
+
+            return 1 - (double)dist / Math.Max(reader.BaseStream.Length, otherReader.BaseStream.Length);
+        }
+
+        private static long LevenshteinDistance(this StreamReader reader, StreamReader otherReader)
+        {
+
+            return 0;
+        }
+
+        private static long NaiveDiffComparision(this StreamReader reader, StreamReader otherReader)
+        {
+            long diffCount = 0L;
+            int currentChar, otherChar;
+
+            while (true)
             {
-                currentByte = stream.ReadByte();
-                otherByte = otherStream.ReadByte();
-                if (currentByte == -1 || otherByte == -1) break;
+                currentChar = reader.Read();
+                otherChar = otherReader.Read();
 
-                Console.Write("{0},", currentByte);
-                if (currentByte == otherByte) similarityCount += 1;
+                if (currentChar == -1 || otherChar == -1) break;
+
+                if (currentChar != otherChar) diffCount += 1;
             }
 
-            stream.Position = otherStream.Position = 0;
-
-            return (double)similarityCount / Math.Max(stream.Length, otherStream.Length);
+            return diffCount;
         }
         #endregion
 

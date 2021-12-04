@@ -6,7 +6,16 @@ namespace CodeTranslator.Core.Translation
 {
     public interface ITranslation
     {
-        public IOutput GetOutput(CodeFile codeFile);
-        public IObservable<ProgressStatus> GetObservableProgressTracker(); 
+        /// <summary>
+        /// 
+        /// </summary>
+        event EventHandler<TranslationProgressEventArgs> TranslationTracker;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="codeFile"></param>
+        /// <returns></returns>
+        IOutput GetOutput(CodeFile codeFile);
     }
 }
