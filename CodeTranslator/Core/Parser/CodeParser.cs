@@ -1,23 +1,26 @@
-﻿using CodeTranslator.Model;
-using CodeTranslator.Rules;
-using System;
-using System.Collections.Generic;
+﻿using CodeTranslator.Core.Parser.Components;
+using CodeTranslator.Core.Parser.Decomposer;
+using CodeTranslator.Core.Parser.Recomposer;
+using CodeTranslator.Core.Output;
 
 namespace CodeTranslator.Core.Parser
 {
-    internal class CodeParser : IParser
+    public class CodeParser : IParser
     {
-        public IEnumerable<IRule> Rules { get; set; }
-        public CodeTranslationSettings Settings { get; set; }
+        private readonly IDecomposer _decomposer;
+        private readonly IRecomposer _recomposer;
+        private AbstractSyntaxTree<Statement> _cache;
 
-        public void Parse(string content)
+        public CodeParser(IDecomposer decomposer, IRecomposer recomposer)
         {
-            throw new NotImplementedException();
+            _decomposer = decomposer;
+            _recomposer = recomposer;
         }
 
-        public string Translate()
-        {
-            throw new NotImplementedException();
-        }
+        public AbstractSyntaxTree<Statement> AST => _cache;
+
+        public void Parse(string content) => _cache = _decomposer.Decompose(content);
+
+        public IOutput Translate(string fileName) => _recomposer.Recompose(_cache, fileName);
     }
 }

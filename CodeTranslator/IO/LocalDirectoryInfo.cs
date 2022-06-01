@@ -10,8 +10,11 @@ namespace CodeTranslator.IO
         private readonly DirectoryInfo _info;
 
         public bool Exists => _info.Exists;
+
         public string Name => _info.Name;
+
         public string Extension => _info.Extension;
+        
         public string FullName => _info.FullName;
 
         public LocalDirectoryInfo(string path)

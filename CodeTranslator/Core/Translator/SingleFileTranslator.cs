@@ -1,5 +1,5 @@
 ﻿using CodeTranslator.IO;
-using CodeTranslator.Core.Translation;
+using CodeTranslator.Core.Parser;
 using CodeTranslator.Core.Tree;
 using CodeTranslator.Common;
 
@@ -9,7 +9,7 @@ namespace CodeTranslator.Core.Translator
     {
         public override TranslatorType Type => TranslatorType.SingleFile;
 
-        public SingleFileTranslator(SingleFileTree rootDirectory, ITranslation translation)
-            : base(rootDirectory, translation) { }
+        public SingleFileTranslator(SingleFileTree rootDirectory, IParser parser)
+            : base(rootDirectory, parser) { }
     }
 }

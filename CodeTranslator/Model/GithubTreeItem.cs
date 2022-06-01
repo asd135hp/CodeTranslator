@@ -1,19 +1,17 @@
 ﻿using System.Linq;
-using CodeTranslator.IO;
 using Octokit;
 
 namespace CodeTranslator.Model
 {
     public abstract class GitHubTreeItem
     {
-        protected bool _exists;
         private readonly string _absolutePath;
         private readonly GitHubAPIInfo _apiInfo;
 
         internal GitHubAPIInfo APIInfo => _apiInfo;
 
-        public bool Exists => _exists;
-        public string Sha => _apiInfo.TreeSHA;
+        // source of quick depletion on the number of remaining API calls - Debatable #1
+        public bool Exists => APIInfo.IsRepositoryExist;
         public string AbsolutePath => _absolutePath;
         public string AbsoluteUrl => _apiInfo.Url.AbsoluteUri;
         public RateLimit RateLimit => _apiInfo.RateLimit;
@@ -28,10 +26,8 @@ namespace CodeTranslator.Model
         protected GitHubTreeItem(GitHubAPIInfo apiInfo)
         {
             _apiInfo = apiInfo;
-            _exists = apiInfo.IsRepositoryExist;
-
             var segments = apiInfo.Url.Segments;
-            if(segments.Length > 5 && Exists)
+            if(segments.Length > 5 && apiInfo.IsRepositoryExist)
                 _absolutePath = string.Join("", segments.Skip(5)).Trim().TrimEnd('/', '\\');
         }
     }

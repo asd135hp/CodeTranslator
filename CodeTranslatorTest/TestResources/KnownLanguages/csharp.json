@@ -1,0 +1,96 @@
+{
+  // separate sub-components with a vertical slash "|"
+  // if sub-components are composed of two or more constants then separate them with a whitespace
+  // example: ** could be represented as "Asterisk Asterisk"
+  "components": {
+    // Known arithmetic signs
+    "ArithmeticOps": "Add|Hyphen|Asterisk|Slash|Percentage|Asterisk Asterisk|Caret",
+
+    "Indent": "\t",
+
+    /// <summary>
+    /// Could be English based ops like "and" instead of && or "not" instead of !
+    /// </summary>
+    "public" "string",
+    "LogicalOps": ""
+
+    /// <summary>
+    /// Could be English based ops like "and" instead of & or "or" instead of |
+    /// <para>
+    /// When defining this, be careful to not make logical ops and bitwise ops
+    /// become ambiguous
+    /// </para>
+    /// </summary>
+    "public" "string",
+    "BitwiseOps" { "get;" "set;" },
+
+    /// <summary>
+    /// Normally, the ops would be this set: ==, >, <.
+    /// However, it could be modified to accept === too
+    /// </summary>
+    "public" "string",
+    "ComparisionOps" { "get;" "set;" },
+
+    /// <summary>
+    /// In low level languages or unsafe blocks, this is necessary.
+    /// Must specify Reference too or an exception will be thrown.
+    /// <para>Default: Asterisk (*)</para>
+    /// </summary>
+    "public" "string",
+    "Pointer" { "get;" "set;" },
+
+    /// <summary>
+    /// In low level languages or unsafe blocks, this is necessary.
+    /// Must specify Pointer too or an exception will be thrown.
+    /// <para>Default: Ampersand (&)</para>
+    /// </summary>
+    "public" "string",
+    "Reference" { "get;" "set;" },
+
+    /// <summary>
+    /// Mainly for arrow functions, could be => or ->
+    /// <para>Default: ThickArrow (=>)</para>
+    /// </summary>
+    "public" "string",
+    "Arrow" { "get;" "set;" },
+
+    /// <summary>
+    /// Normally, this would be a semi-colon. Some languages do not need semi-colons
+    /// for end of line indication
+    /// <para>Default: SemiColon (;)</para>
+    /// </summary>
+    "public" "string",
+    "EndOfLine" { "get;" "set;" },
+
+    "#endregion" "#region",
+
+    /// <summary>
+    /// In C#, the modifiers are "private|protected|internal|public"
+    /// </summary>
+    "public" "string",
+    "AccessModifier" { "get;" "set;" },
+
+    /// <summary>
+    /// In C#, it is called "sealed" while in Java, it is "final" instead
+    /// </summary>
+    "public" "string",
+    "InheritancePrevention" { "get;" "set;" },
+
+    /// <summary>
+    /// Equilvalent to "params" in C# or ".." in JS
+    /// </summary>
+    "public" "string",
+    "ParameterList" { "get;" "set;" },
+
+    "public" "string",
+    "A" { "get;" "set;" },
+
+    "#endregion"
+  },
+  "rules": {
+
+  },
+  "settings": {
+
+  }
+}

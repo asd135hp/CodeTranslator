@@ -23,58 +23,59 @@ namespace CodeTranslator.IO
         /// <summary>
         /// Public (and private for specific user) GitHub directory reader
         /// </summary>
-        /// <param name="GitHubUrl"></param>
+        /// <param name="client"></param>
+        /// <param name="gitHubUrl"></param>
         /// <param name="commitReference"></param>
-        /// <param name="accessToken"></param>
         public GitHubDirectoryInfo(
-            string GitHubUrl,
-            string commitReference,
-            string accessToken)
-            : this(new Uri(GitHubUrl), commitReference, accessToken, "") { }
+            GitHubClient client,
+            string gitHubUrl,
+            string commitReference)
+            : this(client, new Uri(gitHubUrl), commitReference) { }
 
         /// <summary>
         /// Public (and private for specific user) GitHub directory reader
         /// </summary>
-        /// <param name="GitHubUrl"></param>
+        /// <param name="client"></param>
+        /// <param name="gitHubUrl"></param>
         /// <param name="commitReference"></param>
-        /// <param name="accessToken"></param>
         public GitHubDirectoryInfo(
-            Uri GitHubUrl,
-            string commitReference,
-            string accessToken)
-            : this(GitHubUrl, commitReference, accessToken, "") { }
+            GitHubClient client,
+            Uri gitHubUrl,
+            string commitReference)
+            : this(client, gitHubUrl, commitReference, "") { }
 
         /// <summary>
         /// Public (and private for specific user) GitHub directory reader
         /// </summary>
-        /// <param name="GitHubUrl"></param>
+        /// <param name="client"></param>
+        /// <param name="gitHubUrl"></param>
         /// <param name="commitReference"></param>
-        /// <param name="accessToken"></param>
         /// <param name="branch"></param>
         public GitHubDirectoryInfo(
-            string GitHubUrl,
+            GitHubClient client,
+            string gitHubUrl,
             string commitReference,
-            string accessToken,
             string branch)
-            : this(new Uri(GitHubUrl), commitReference, accessToken, branch) { }
+            : this(client, new Uri(gitHubUrl), commitReference, branch) { }
 
         /// <summary>
         /// Public (and private for specific user) GitHub directory reader
         /// </summary>
-        /// <param name="GitHubUrl"></param>
+        /// <param name="client"></param>
+        /// <param name="gitHubUrl"></param>
         /// <param name="commitReference"></param>
-        /// <param name="accessToken"></param>
         /// <param name="branch"></param>
         public GitHubDirectoryInfo(
-            Uri GitHubUrl,
+            GitHubClient client,
+            Uri gitHubUrl,
             string commitReference,
-            string accessToken,
             string branch)
-            : this(new GitHubAPIInfo()
-                  .SetAccessToken(accessToken)
-                  .SetGitHubUrl(GitHubUrl)
-                  .SetCommit(commitReference)
-                  .SetBranch(branch)) { }
+            : this(new GitHubAPIInfo(client)
+            {
+                Url = gitHubUrl,
+                CommitSHA = commitReference,
+                Branch = branch,
+            }) { }
 
         /// <summary>
         /// Public (and private for specific user) GitHub directory reader
@@ -135,21 +136,40 @@ namespace CodeTranslator.IO
                 });
 
         /// <summary>
-        /// 
+        /// Fetch this GitHub tree
         /// </summary>
         /// <returns></returns>
         private async Task<TreeResponse> FetchGitHubTree()
-            => Exists ? await APIInfo.FetchTree() : null;
+            => Exists ? (
+                APIInfo.CommitSHA.Length != 0 ?
+                    await APIInfo.Client.Git.Tree.Get(
+                        APIInfo.Owner,
+                        APIInfo.RepositoryName,
+                        APIInfo.TreeSHA
+                    ) : null
+            ) : null;
 
         /// <summary>
-        /// 
+        /// Re-cast path into GitHub API url
         /// </summary>
         /// <param name="childPath"></param>
         /// <returns></returns>
         private Uri GetUrl(string childPath)
-            => new Uri($"https://GitHub.com/{APIInfo.Owner}/{APIInfo.RepositoryName}" +
+            => new Uri($"https://github.com/{APIInfo.Owner}/{APIInfo.RepositoryName}" +
                 $"/tree/{APIInfo.Branch}/{AbsolutePath}/{childPath}");
 
+        /// <summary>
+        /// Fetch all child tree items
+        /// <para>
+        /// (It is debatable whether to cache data to save API calls
+        /// or to not cache data to save computer resources)
+        /// </para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="type"></param>
+        /// <param name="generateObj"></param>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         private async Task<IEnumerable<T>> FetchTreeItems<T>(
             TreeType type,
             Func<GitHubAPIInfo, T> generateObj,
@@ -163,13 +183,13 @@ namespace CodeTranslator.IO
                 foreach (var treeItem in _cache)
                     if (treeItem.Type == type)
                     {
-                        if (filter?.Invoke(treeItem) ?? false) continue;
+                        if (filter != null && filter.Invoke(treeItem)) continue;
 
                         var url = GetUrl(treeItem.Path);
-                        var apiInfo = (APIInfo.Clone() as GitHubAPIInfo)
-                            .SetGitHubUrl(url)
-                            .SetTreeReference(treeItem.Sha);
+                        var apiInfo = APIInfo.Clone() as GitHubAPIInfo;
 
+                        apiInfo.Url = url;
+                        apiInfo.TreeSHA = treeItem.Sha;
                         list.Add(generateObj.Invoke(apiInfo));
                     }
 

@@ -1,11 +1,21 @@
-﻿using CodeTranslator.Core.Tree;
+﻿using CodeTranslator.Core.Translator;
 
 namespace CodeTranslator.Core.Input
 {
     public interface IInput
     {
-        GitHubDirectoryTree ToGitHubDirectoryTree();
-        LocalDirectoryTree ToLocalDirectoryTree();
-        SingleFileTree ToSingleFileDirectoryTree();
+        string RootPath { get; set; }
+
+        GitHubTranslator GetGitHubTranslator(
+            string productName,
+            string accessToken,
+            string commitReference,
+            string branch = "");
+
+        LocalDirectoryTranslator GetLocalDirectoryTranslator();
+
+        SingleFileTranslator GetSingleFileTranslator();
+
+        ZipFileTranslator GetZipFileTranslator();
     }
 }

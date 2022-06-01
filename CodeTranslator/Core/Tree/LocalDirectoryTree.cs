@@ -34,7 +34,9 @@ namespace CodeTranslator.Core.Tree
         /// <summary>
         /// Populate directory tree on demand instead of recursively to save performance
         /// </summary>
-        public override async Task PopulateAll()
+        public override async Task PopulateAll(
+            string[] whiteListedExtensions = null,
+            string[] blackListedExtensions = null)
             => await Task.Run(async () => {
                 // no more than 255 sub-folders deep to be registered in the tree
                 if (Depth >= MAX_DEPTH) return;

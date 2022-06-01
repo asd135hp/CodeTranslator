@@ -1,9 +1,10 @@
 ﻿using CodeTranslator.Common;
-using CodeTranslator.Core.Output;
-using CodeTranslator.Core.Translation;
+using CodeTranslator.Core.Parser;
 using CodeTranslator.Core.Tree;
+using CodeTranslator.Core.Output;
 using CodeTranslator.IO;
-using CodeTranslator.Model;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace CodeTranslator.Core.Translator
 {
@@ -12,20 +13,18 @@ namespace CodeTranslator.Core.Translator
         where TDirectoryInfo : IDirectoryInfo
         where TFileInfo : IReadonlyFileInfo
     {
-        private readonly ITranslation _translation;
+        private readonly IParser _parser;
         protected DirectoryTree<TDirectoryInfo, TFileInfo> _rootDirectory;
 
         public abstract TranslatorType Type { get; }
 
-        public AbstractTranslator(ITranslation translation)
+        public AbstractTranslator(IParser parser)
         {
-            _translation = translation;
+            _parser = parser;
         }
 
-        public AbstractTranslator(
-            DirectoryTree<TDirectoryInfo, TFileInfo> rootDirectory,
-            ITranslation translation)
-            : this(translation)
+        public AbstractTranslator(DirectoryTree<TDirectoryInfo, TFileInfo> rootDirectory, IParser parser)
+            : this(parser)
         {
             _rootDirectory = rootDirectory;
         }
@@ -33,7 +32,13 @@ namespace CodeTranslator.Core.Translator
         public DirectoryTree<TDirectoryInfo, TFileInfo> GetDirectoryTree()
             => _rootDirectory;
 
-        public IOutput TranslateFile(CodeFile codeFile)
-            => _translation.GetOutput(codeFile);
+        public IEnumerable<IOutput> TranslateFiles()
+            => _rootDirectory.Files.Select(file => TranslateFile(file));
+
+        public IOutput TranslateFile(IReadonlyFileInfo file)
+        {
+            file.OpenText(reader => _parser.Parse(reader.ReadToEnd()));
+            return _parser.Translate(file.Name);
+        }
     }
 }

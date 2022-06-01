@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using CodeTranslator.Common;
-using CodeTranslator.Core.Translation;
+using CodeTranslator.Core.Parser;
 using CodeTranslator.Core.Tree;
 using CodeTranslator.IO;
 using CodeTranslator.Model;
@@ -20,8 +20,8 @@ namespace CodeTranslator.Core.Translator
 
         public override TranslatorType Type => TranslatorType.ZipFile;
 
-        public ZipFileTranslator(string zipFilePath, ITranslation translation)
-            : base(translation)
+        public ZipFileTranslator(string zipFilePath, IParser parser)
+            : base(parser)
         {
             using var stream = File.OpenRead(zipFilePath);
             _generatedDir = $@".\{new Guid(zipFilePath.ToByteArray())}";

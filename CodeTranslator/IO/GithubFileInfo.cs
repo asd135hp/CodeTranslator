@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Octokit;
 
 using CodeTranslator.Model;
 
@@ -27,10 +28,10 @@ namespace CodeTranslator.IO
         /// <param name="commitReference"></param>
         /// <param name="accessToken"></param>
         public GitHubFileInfo(
-            string GitHubUrl,
-            string commitReference,
-            string accessToken)
-            : this(new Uri(GitHubUrl), commitReference, accessToken, "") { }
+            GitHubClient client,
+            string githubUrl,
+            string commitReference)
+            : this(client, new Uri(githubUrl), commitReference, "") { }
 
         /// <summary>
         /// Public (and private for specific user) GitHub file reader
@@ -39,10 +40,10 @@ namespace CodeTranslator.IO
         /// <param name="commitReference"></param>
         /// <param name="accessToken"></param>
         public GitHubFileInfo(
-            Uri GitHubUrl,
-            string commitReference,
-            string accessToken)
-            : this(GitHubUrl, commitReference, accessToken, "") { }
+            GitHubClient client,
+            Uri githubUrl,
+            string commitReference)
+            : this(client, githubUrl, commitReference, "") { }
 
         /// <summary>
         /// Public (and private for specific user) GitHub file reader
@@ -52,11 +53,11 @@ namespace CodeTranslator.IO
         /// <param name="accessToken"></param>
         /// <param name="branch"></param>
         public GitHubFileInfo(
-            string GitHubUrl,
+            GitHubClient client,
+            string githubUrl,
             string commitReference,
-            string accessToken,
             string branch)
-            : this(new Uri(GitHubUrl), commitReference, accessToken, branch) { }
+            : this(client, new Uri(githubUrl), commitReference, branch) { }
 
         /// <summary>
         /// Public (and private for specific user) GitHub file reader
@@ -66,15 +67,16 @@ namespace CodeTranslator.IO
         /// <param name="accessToken"></param>
         /// <param name="branch"></param>
         public GitHubFileInfo(
-            Uri GitHubUrl,
+            GitHubClient client,
+            Uri githubUrl,
             string commitReference,
-            string accessToken,
             string branch)
-            : this(new GitHubAPIInfo()
-                  .SetAccessToken(accessToken)
-                  .SetGitHubUrl(GitHubUrl)
-                  .SetCommit(commitReference)
-                  .SetBranch(branch)) { }
+            : this(new GitHubAPIInfo(client)
+            {
+                Url = githubUrl,
+                CommitSHA = commitReference,
+                Branch = branch,
+            }) { }
 
         public GitHubFileInfo(GitHubAPIInfo apiInfo) : base(apiInfo)
         {
@@ -82,19 +84,28 @@ namespace CodeTranslator.IO
             // set up name and extension of this tree item if possible
             if (Exists)
             {
+                // start fetching content of the file
                 if (segments.Length > 5)
                     _fileName = new FileName(apiInfo.Url.LocalPath);
 
-                // start fetching content of the file
+                // create temp file and directory if not exists
                 _filePath = $"{STORING_FOLDER}\\{apiInfo.TreeSHA}.tmp";
                 System.IO.Directory.CreateDirectory(STORING_FOLDER);
+
+                // clear cache for appending text
                 if (File.Exists(_filePath))
                     File.WriteAllText(_filePath, "");
 
-                foreach (var repoContent in this.AwaitTask(apiInfo.FetchFileContent(AbsolutePath)))
+                // fetch content
+                var fileContent = apiInfo.Client
+                    .Repository
+                    .Content
+                    .GetAllContents(apiInfo.Owner, apiInfo.RepositoryName, AbsolutePath);
+
+                // append all text to the temp file
+                foreach (var repoContent in this.AwaitTask(fileContent))
                     File.AppendAllText(_filePath, repoContent.Content ?? "");
             }
-            else _exists = false;
         }
 
         public void OpenText(Action<StreamReader> fileReader)

@@ -1,25 +1,20 @@
-﻿using System.Collections.Generic;
-using CodeTranslator.Model;
-using CodeTranslator.Rules;
+﻿using CodeTranslator.Core.Output;
 
 namespace CodeTranslator.Core.Parser
 {
-    internal interface IParser
+    public interface IParser
     {
-        IEnumerable<IRule> Rules { get; set; }
-
-        CodeTranslationSettings Settings { get; set; }
-
         /// <summary>
-        /// Start parsing the provided content
+        /// Start parsing the provided content into a tree of tokens (Abstract Syntax Tree or any tree)
         /// </summary>
         /// <param name="content"></param>
         void Parse(string content);
 
         /// <summary>
-        /// Translate words parsed by this object
+        /// Translate words parsed by this object (combine all keywords into a single file)
         /// </summary>
+        /// <param name="fileName"></param>
         /// <returns></returns>
-        string Translate();
+        IOutput Translate(string fileName);
     }
 }

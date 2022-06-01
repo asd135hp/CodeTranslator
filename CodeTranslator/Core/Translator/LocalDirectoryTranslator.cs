@@ -1,5 +1,5 @@
 ﻿using CodeTranslator.IO;
-using CodeTranslator.Core.Translation;
+using CodeTranslator.Core.Parser;
 using CodeTranslator.Core.Tree;
 using CodeTranslator.Common;
 
@@ -10,10 +10,8 @@ namespace CodeTranslator.Core.Translator
     {
         public override TranslatorType Type => TranslatorType.LocalDirectory;
 
-        public LocalDirectoryTranslator(
-            LocalDirectoryTree directoryTree,
-            ITranslation translation)
-            : base(directoryTree, translation)
+        public LocalDirectoryTranslator(LocalDirectoryTree directoryTree, IParser parser)
+            : base(directoryTree, parser)
         {
 
         }
